@@ -97,8 +97,15 @@ class UserContext:
         # _Karvis 系统文件（memory 走 IO，config/log 始终本地）
         self.memory_file = os.path.join(self.base_dir, "_Karvis", "memory", "memory.md")
 
-        # 03-Finance（仅管理员可能使用，但路径先定义好）
-        _finance = os.path.join(self.base_dir, "03-Finance")
+        # 03-WeChat 微信离线数据
+        _wechat = os.path.join(self.base_dir, "03-WeChat")
+        self.wechat_dir = _wechat
+        self.wechat_notes_dir = os.path.join(_wechat, "笔记")
+        self.wechat_favorites_dir = os.path.join(_wechat, "收藏")
+        self.wechat_articles_dir = os.path.join(_wechat, "公众号")
+
+        # 04-Finance（仅管理员可能使用，但路径先定义好）
+        _finance = os.path.join(self.base_dir, "04-Finance")
         self.finance_dir = _finance
         self.finance_data_file = os.path.join(_finance, "finance_data.json")
         self.finance_inbox_dir = os.path.join(_finance, "inbox")
@@ -135,11 +142,17 @@ class UserContext:
         # _Karvis 系统文件
         self.memory_file = f"{base}/_Karvis/memory/memory.md"
 
-        # 03-Finance
-        self.finance_dir = f"{base}/03-Finance"
-        self.finance_data_file = f"{base}/03-Finance/finance_data.json"
-        self.finance_inbox_dir = f"{base}/03-Finance/inbox"
-        self.finance_reports_dir = f"{base}/03-Finance/reports"
+        # 03-WeChat 微信离线数据
+        self.wechat_dir = f"{base}/03-WeChat"
+        self.wechat_notes_dir = f"{base}/03-WeChat/笔记"
+        self.wechat_favorites_dir = f"{base}/03-WeChat/收藏"
+        self.wechat_articles_dir = f"{base}/03-WeChat/公众号"
+
+        # 04-Finance
+        self.finance_dir = f"{base}/04-Finance"
+        self.finance_data_file = f"{base}/04-Finance/finance_data.json"
+        self.finance_inbox_dir = f"{base}/04-Finance/inbox"
+        self.finance_reports_dir = f"{base}/04-Finance/reports"
 
     def _load_config(self) -> dict:
         """从本地文件加载用户配置（user_config.json 始终存储在本地）"""
@@ -202,6 +215,7 @@ class UserContext:
         base = self.base_dir
         inbox = os.path.join(base, "00-Inbox")
         _notes = os.path.join(base, "02-Notes")
+        _wechat = os.path.join(base, "03-WeChat")
         _karvis = os.path.join(base, "_Karvis")
         return [
             inbox,
@@ -213,6 +227,9 @@ class UserContext:
             os.path.join(_notes, "情感日记"),
             os.path.join(_notes, "生活趣事"),
             os.path.join(_notes, "语音日记"),
+            os.path.join(_wechat, "笔记"),
+            os.path.join(_wechat, "收藏"),
+            os.path.join(_wechat, "公众号"),
             os.path.join(_karvis, "memory"),
             os.path.join(_karvis, "logs"),
         ]

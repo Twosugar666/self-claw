@@ -11,6 +11,11 @@ DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
 DEEPSEEK_BASE_URL = os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")
 DEEPSEEK_MODEL = os.environ.get("DEEPSEEK_MODEL", "deepseek-v3.2")
 
+# ============ Second LLM Channel (用于两阶段生成: 理解阶段) ============
+LLM2_API_KEY = os.environ.get("DEEPSEEK_API_1_KEY", "")
+LLM2_BASE_URL = os.environ.get("DEEPSEEK_BASE_1_URL", "")
+LLM2_MODEL = os.environ.get("DEEPSEEK_1_MODEL", "")
+
 # ============ Qwen Flash API (Tier 1: Flash) ============
 QWEN_API_KEY = os.environ.get("QWEN_API_KEY", "")
 QWEN_BASE_URL = os.environ.get("QWEN_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")

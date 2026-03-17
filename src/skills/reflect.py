@@ -609,7 +609,7 @@ def history(params, state, ctx):
 # ============ 辅助函数 ============
 
 def _generate_response(question, category, answer_text, state):
-    """调用 Flash LLM 生成对深度自问回答的回应"""
+    """调用 LLM 生成对深度自问回答的回应"""
     try:
         from brain import call_llm
         import prompts
@@ -631,7 +631,7 @@ def _generate_response(question, category, answer_text, state):
         response = call_llm([
             {"role": "system", "content": prompts.REFLECT_RESPONSE},
             {"role": "user", "content": context}
-        ], model_tier="flash", max_tokens=200, temperature=0.7)
+        ], model_tier="main", max_tokens=200, temperature=0.7)
 
         return response
     except Exception as e:

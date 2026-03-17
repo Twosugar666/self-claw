@@ -12,7 +12,7 @@ def skill(
     description,     # 给 LLM 看的一句话描述
     params=None,     # 参数 schema {name: "说明", ...}
     rules="",        # 给 LLM 的触发/使用规则（自然语言）
-    simple=True,     # 是否为简单 skill（直接返回回复，不走 Flash 二次加工）
+    simple=True,     # 是否为简单 skill（直接返回回复，不走二次加工）
     long=False,      # 是否为长任务（需先发确认消息）
     group="core",    # 所属分组，用于条件注入（core/finance/book/habit/advanced）
     keywords=None,   # 触发关键词，用于 group != "core" 时的条件匹配

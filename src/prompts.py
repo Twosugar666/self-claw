@@ -66,9 +66,10 @@ SKILL_PROMPT_LINES = {
     "decision.list": '**decision.list** `{}` — 查看待复盘的决策',
     "voice.journal": '**voice.journal** `{asr_text, attachment?, duration_hint?}` — 长语音(>200字)自动整理为结构化日记（主题/情绪/关键事件/洞察），写入 02-Notes/语音日记/',
     "deep.dive": '**deep.dive** `{topic, keywords?, save?}` — 主题深潜：跨时间线搜索全历史数据，生成深度分析报告（时间线/趋势/洞察/建议）',
+    "content.generate": '**content.generate** `{task, source_keywords?, output_format?, source_paths?, save?}` — 基于笔记内容生成新内容。当用户不只是找东西，而是要"基于/根据/整理/总结/写"已有笔记内容时使用。task=生成任务描述, source_keywords=源内容关键词, output_format=输出格式(文章/总结/大纲/邮件/报告等), source_paths=直接指定源文件路径。会两阶段调用模型：先完整理解所有源内容，再高质量生成。与 deep.dive 的区别：deep.dive 是分析型（趋势洞察），content.generate 是生成型（产出新文本）',
     "internal.read": '**internal.read** `{paths, max_chars?}` — [Agent Loop 专用] 读取指定文件内容（paths 为相对 OBSIDIAN_BASE 的路径数组，最多5个）',
     "internal.search": '**internal.search** `{keywords, scope?, max_results?}` — [Agent Loop 专用] 在笔记中搜索关键词（scope: quick_notes|archives|all）',
-    "internal.list": '**internal.list** `{directory}` — [Agent Loop 专用] 列出指定目录下的文件列表',
+    "internal.list": '**internal.list** `{directory}` — [Agent Loop 专用] 列出指定目录下的文件列表。directory 支持别名："笔记"或"日记"→ 自动指向 03-WeChat/笔记，"收藏"→ 03-WeChat/收藏，"公众号"→ 03-WeChat/公众号。⚠️ 用户说"笔记""日记"时，directory 应填"笔记"（不要填 02-Notes 路径）',
     "settings.nickname": '**settings.nickname** `{nickname}` — 设置用户昵称（用户说"叫我XX"、"我叫XX"时触发。注意区分方向：「叫我XX」是设用户昵称，「叫你XX」是给AI起名）',
     "settings.ai_name": '**settings.ai_name** `{ai_name}` — 给 AI 起昵称（用户说"我叫你XX"、"叫你XX"、"你叫XX"时触发。这是用户给 Karvis 起的名字）',
     "settings.soul": '**settings.soul** `{style, mode?}` — 设置 AI 说话风格（mode: set=覆盖, append=在原有基础上追加, reset=恢复默认。用户说"活泼一点/正式一些"→set；"再幽默一点"→append；"恢复默认风格"→reset）',
@@ -86,6 +87,7 @@ SKILL_PROMPT_LINES = {
     "finance.snapshot": '**finance.snapshot** `{}` — 生成当前财务快照（资产/负债/净值）',
     "finance.import": '**finance.import** `{source?}` — 导入财务数据（从 inbox 目录读取）',
     "finance.monthly": '**finance.monthly** `{month?}` — 生成月度财务报告',
+    "wechat.search": '**wechat.search** `{query, keywords?, category?, max_results?}` — 微信离线数据检索。在 03-WeChat 目录中搜索用户离线存储的微信笔记/收藏/公众号文章。query=用户原始问题, keywords=搜索关键词数组, category=可选强制指定类别(笔记/收藏/公众号), max_results=最大返回条数(默认15)。返回匹配内容后设 continue=true，由你基于检索结果生成最终回复。',
 }
 
 
@@ -408,7 +410,21 @@ RULES_ADVANCED = """## 决策复盘系统（V3-F15）
   - 最多 5 轮，不要无限循环
   - 每轮拿到信息后，判断是否足够回答——够了就 continue=false + 正常回复
 - **最终回答**：最后一轮 continue=false 时，reply 中直接给用户答案（基于之前搜集到的信息）
-- 不要为了简单问题启动 Agent Loop，只有确实需要查阅文件时才用"""
+- 不要为了简单问题启动 Agent Loop，只有确实需要查阅文件时才用
+
+## 微信离线数据检索（wechat.search）
+当用户提到以下内容时，优先使用 `wechat.search` 在微信离线数据中检索：
+- **⚠️ 核心规则：用户说"笔记""日记"时，默认数据源是 `03-WeChat`（微信离线数据目录），而非 02-Notes。** 因为用户的笔记/日记主要存储在微信导出的 03-WeChat 目录中。只有明确说"速记""工作笔记""情感日记"等 Karvis 系统笔记时，才去 02-Notes。
+- **精确命中**：用户提到"笔记""收藏""公众号""文章""推文""日记"等关键词 → 设 category 精确搜索对应子目录
+  - "我笔记里有个XX" / "我的日记里提到XX" → `{"query": "XX", "keywords": ["XX"], "category": "笔记"}`（指向 03-WeChat/笔记/）
+  - "我微信笔记里有个XX" → `{"query": "XX", "keywords": ["XX"], "category": "笔记"}`
+  - "之前收藏的那篇关于XX的" → `{"query": "XX", "keywords": ["XX"], "category": "收藏"}`
+  - "那个公众号写过一篇XX" → `{"query": "XX", "keywords": ["XX"], "category": "公众号"}`
+- **模糊检索**：用户想找某个信息但不确定来源，或提到"微信里""之前看过""存过" → 不设 category，全量搜索
+  - "我之前存过一个菜谱" → `{"query": "菜谱", "keywords": ["菜谱", "做法", "食材"]}`
+- **优先级**：当用户查找信息时，先检查 03-WeChat 是否有匹配，再考虑其他来源
+- 使用 `continue=true`，拿到检索结果后基于内容生成自然语言回复
+- 如果没找到结果，友好告知并建议用户检查是否已导入数据"""
 
 # 向后兼容：保留 RULES 变量，拼接所有分段
 # V12: 新增 RULES_FINANCE（仅管理员会注入）和 RULES_SKILLS_MGMT
@@ -719,6 +735,100 @@ DEEP_DIVE_USER = """你是一个深度分析助手。用户想深入了解「{to
 - 只基于数据说话，不要编造
 - 如果数据不足以得出结论，诚实说明
 - 保持简洁，不超过 500 字"""
+
+# ============================================================
+# content.generate — 基于笔记内容的两阶段智能生成
+# ============================================================
+
+CONTENT_GEN_PHASE1_SYSTEM = """你是一个专业的内容理解助手。你的任务是：
+1. 完整阅读用户提供的所有笔记内容，不要跳过任何部分
+2. 深刻理解用户的生成需求
+3. 从源内容中提取所有与生成任务相关的关键信息
+4. 输出结构化的理解摘要，供下一阶段的生成模型使用
+
+你必须做到：
+- 逐段阅读，不遗漏任何关键细节
+- 准确标注每个信息点来自哪个来源
+- 区分事实性内容和观点性内容
+- 发现内容之间的关联和矛盾
+- 特别注意时间线、情绪变化、关键人物和核心事件"""
+
+CONTENT_GEN_PHASE1_USER = """## 用户需求
+生成任务：{task}
+期望格式：{output_format}
+
+## 源内容（共 {source_count} 个来源，{total_chars} 字）
+
+请你完整阅读以下所有内容，逐段提取与生成任务相关的关键信息。
+
+{all_content}
+
+## 请输出结构化理解
+
+请按以下格式输出你的理解结果：
+
+### 1. 需求理解
+- 用户真正想要什么
+- 输出应该包含哪些要素
+
+### 2. 关键信息提取
+逐条列出从源内容中提取的所有与生成任务相关的关键信息点，标注来源。
+
+### 3. 内容关联
+- 不同来源内容之间的关联
+- 时间线梳理（如有）
+- 重要发现和模式
+
+### 4. 生成建议
+- 推荐的内容结构
+- 需要强调的重点
+- 需要注意的细节"""
+
+CONTENT_GEN_PHASE1_CHUNK_USER = """## 用户需求
+生成任务：{task}
+期望格式：{output_format}
+
+## 源内容（第 {chunk_index}/{total_chunks} 批）
+
+请你完整阅读以下内容，提取与生成任务相关的所有关键信息。
+
+{chunk_content}
+
+## 请输出
+
+逐条列出从这批内容中提取的与生成任务相关的关键信息点，标注来源。注意保留完整的细节和上下文。"""
+
+CONTENT_GEN_PHASE2_SYSTEM = """你是一个高质量内容生成助手。基于前置理解阶段提供的结构化分析，生成用户要求的最终内容。
+
+你的原则：
+- 只基于提供的源内容信息生成，不编造
+- 语言自然流畅，符合指定的输出格式
+- 如果信息不足以完成某个部分，诚实说明
+- 用第二人称"你"
+- 直接输出最终内容，不要加 JSON 格式包装"""
+
+CONTENT_GEN_PHASE2_USER = """## 生成任务
+{task}
+
+## 期望格式
+{output_format}
+
+## 数据来源
+{source_list}（共 {total_chars} 字原始内容）
+
+## 前置理解（由快速模型完整阅读源内容后提取）
+{understanding}
+
+## 请生成
+
+请基于以上理解结果，生成用户要求的「{output_format}」。
+
+要求：
+- 内容必须基于源数据中的真实信息
+- 结构清晰，逻辑通顺
+- 语气自然，不要模板化
+- 如果某些信息不足以支撑结论，如实说明
+- 篇幅适中，不拖沓但该详细的地方要详细"""
 
 # ============================================================
 # book.* — 读书笔记

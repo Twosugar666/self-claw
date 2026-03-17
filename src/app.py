@@ -619,7 +619,7 @@ def handle_message(msg, user_id):
                 )
                 nickname = call_llm(
                     [{"role": "user", "content": extract_prompt}],
-                    model_tier="flash", max_tokens=20, temperature=0
+                    model_tier="main", max_tokens=20, temperature=0
                 )
                 nickname = (nickname or "").strip().strip('"\'""''')
                 if not nickname:
@@ -1538,7 +1538,7 @@ def _build_companion_context(state, ctx):
 
 def _generate_companion_message(signals, context, state):
     """
-    F2: 基于信号 + 上下文，调 Qwen Flash 生成自然的关怀消息。
+    F2: 基于信号 + 上下文，调 Main 模型生成自然的关怀消息。
     注入 soul + memory + 近期速记，让消息更有温度和个性。
     """
     import prompts as _prompts
@@ -1595,8 +1595,8 @@ def _generate_companion_message(signals, context, state):
         {"role": "user", "content": user_message}
     ]
 
-    _log(f"[Companion] 调用 Flash 生成关怀消息, signals={len(signals)}")
-    return brain.call_llm(messages, model_tier="flash", max_tokens=200,
+    _log(f"[Companion] 调用 Main 生成关怀消息, signals={len(signals)}")
+    return brain.call_llm(messages, model_tier="main", max_tokens=200,
                           temperature=0.7)
 
 

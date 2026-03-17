@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Skill: finance.query
-收支即时查询 — 用户随时问收支相关问题，返回结构化数据供 Flash 层生成回复。
+收支即时查询 — 用户随时问收支相关问题，返回结构化数据供回复层生成回复。
 
 V12 移植：handler 签名 (params, state, ctx)，IO 通过 ctx.IO。
 """

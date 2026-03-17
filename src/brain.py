@@ -20,7 +20,7 @@ except ImportError:
 
 from config import (
     DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL, DEEPSEEK_MODEL,
-    QWEN_API_KEY, QWEN_BASE_URL, QWEN_MODEL, QWEN_VL_MODEL,
+    QWEN_API_KEY, QWEN_BASE_URL, QWEN_VL_MODEL,
     CHECKIN_TIMEOUT_SECONDS, SCHEDULER_RHYTHM_WINDOW,
     ADMIN_USER_ID, ALERT_SLOW_THRESHOLD, ALERT_SLOW_CONSECUTIVE,
     ALERT_COOLDOWN_SECONDS,
@@ -255,14 +255,14 @@ def _get_skill_registry():
 def _select_model_tier(payload, is_system_action=False, action=None):
     """
     根据请求类型选择模型层级。
-    Returns: "flash" | "main" | "think"
+    Returns: "main" | "think"
     """
     if is_system_action:
         if action in ("morning_report", "evening_checkin",
                        "daily_report", "weekly_review", "monthly_review"):
             return "main"
         if action == "companion_check":
-            return "flash"
+            return "main"
         return "main"
 
     # 用户消息: 走 Main（一次调用完成分类+回复）
@@ -279,18 +279,15 @@ def _select_skill_model_tier(skill_name):
 def call_llm(messages, model_tier="main", max_tokens=500,
              temperature=0.3, enable_thinking=None):
     """
-    统一 LLM 调用入口，支持三层模型路由 + 自动降级。
+    统一 LLM 调用入口，全部走 DeepSeek。
     
     Args:
-        model_tier: "flash" | "main" | "think"
+        model_tier: "main" | "think"
         enable_thinking: 覆盖 thinking 设置。None = 按 tier 自动决定
     Returns:
         str: LLM 回复文本，失败返回 None
     """
     try:
-        if model_tier == "flash":
-            return _call_qwen_flash(messages, max_tokens, temperature)
-
         thinking = enable_thinking
         if thinking is None:
             thinking = (model_tier == "think")
@@ -298,14 +295,6 @@ def call_llm(messages, model_tier="main", max_tokens=500,
         return _call_deepseek(messages, max_tokens, temperature,
                               enable_thinking=thinking)
     except Exception as e:
-        if model_tier == "flash":
-            _log(f"[Brain] Qwen Flash 失败: {e}, 降级到 DeepSeek")
-            try:
-                return _call_deepseek(messages, max_tokens, temperature,
-                                      enable_thinking=False)
-            except Exception as e2:
-                _log(f"[Brain] DeepSeek 降级也失败: {e2}")
-                return None
         _log(f"[Brain] LLM 调用失败 (tier={model_tier}): {e}")
         return None
 
@@ -351,39 +340,8 @@ def _call_deepseek(messages, max_tokens=500, temperature=0.3,
     raise RuntimeError(f"DeepSeek API {resp.status_code}")
 
 
-def _call_qwen_flash(messages, max_tokens=500, temperature=0.3):
-    """调用 Qwen Flash（阿里云百炼），极快极便宜"""
-    url = f"{QWEN_BASE_URL}/chat/completions"
-    headers = {
-        "Authorization": f"Bearer {QWEN_API_KEY}",
-        "Content-Type": "application/json"
-    }
-    data = {
-        "model": QWEN_MODEL,
-        "messages": messages,
-        "max_tokens": max_tokens,
-        "temperature": temperature
-    }
 
-    total_chars = sum(len(m.get("content", "")) for m in messages)
-    _log(f"[Brain][Flash] Qwen请求: model={QWEN_MODEL}, "
-         f"prompt_chars={total_chars}, max_tokens={max_tokens}")
 
-    t0 = _time.time()
-    resp = requests.post(url, headers=headers, json=data, timeout=30)
-    t1 = _time.time()
-
-    if resp.status_code == 200:
-        result = resp.json()
-        usage = result.get("usage", {})
-        _log(f"[Brain][Flash] Qwen响应: {t1-t0:.1f}s, "
-             f"prompt_tokens={usage.get('prompt_tokens')}, "
-             f"completion_tokens={usage.get('completion_tokens')}")
-        _log_llm_usage("flash", QWEN_MODEL, usage, t1 - t0)
-        return result["choices"][0]["message"]["content"]
-
-    _log(f"[Brain][Flash] Qwen API 错误: {resp.status_code} - {resp.text[:200]}")
-    raise RuntimeError(f"Qwen API {resp.status_code}")
 
 
 def _call_qwen_vl(image_base64, prompt=None):
@@ -396,6 +354,9 @@ def _call_qwen_vl(image_base64, prompt=None):
     Returns:
         str: 图片描述文本，失败返回 None
     """
+    if not QWEN_API_KEY:
+        _log("[Brain][VL] Qwen API Key 未配置，跳过图片理解")
+        return None
     if prompt is None:
         prompt = prompts.VL_DEFAULT
     url = f"{QWEN_BASE_URL}/chat/completions"
@@ -523,9 +484,21 @@ def _select_rules(state, payload=None, ctx=None):
         segments.append(prompts.RULES_HABITS)
 
     # 高级功能：语音 + 关键词触发（去掉 pending_decisions state 触发）
+    # V15: 扩充查找类关键词，确保查找意图能触发 RULES_ADVANCED（含 wechat.search 规则）
     _ADV_KW = ("要不要", "纠结", "犹豫", "决定了", "决策", "复盘",
                "回顾", "分析", "梳理", "深潜", "盘点", "之前写过",
-               "帮我看看", "文件里")
+               "帮我看看", "文件里",
+               # 查找/搜索意图关键词
+               "找一下", "找找", "查一下", "查查", "搜一下", "搜搜",
+               "在哪", "有没有", "有关", "关于", "哪里", "哪个",
+               "之前的", "之前存", "之前看", "之前收藏", "以前",
+               "存过", "记过", "写过", "看过", "收藏过",
+               "笔记", "收藏", "公众号", "文章", "推文", "微信里",
+               "那个", "那篇", "那条",
+               # 生成型意图关键词（content.generate）
+               "基于", "根据", "整理成", "整理一下", "写一篇",
+               "帮我写", "帮我生成", "帮我整理", "帮我总结",
+               "汇总", "归纳", "提炼", "输出")
     is_voice = payload.get("type") == "voice" if payload else False
     if is_voice or any(kw in user_text for kw in _ADV_KW):
         segments.append(prompts.RULES_ADVANCED)
@@ -783,6 +756,14 @@ def process(payload, send_fn=None, ctx=None):
     decision = _parse_llm_output(llm_response)
     if not decision:
         _log(f"[Brain] JSON 解析失败，原始: {llm_response[:300]}")
+        # 兜底：如果 LLM 返回的是有意义的自然语言（>10字且非纯符号），直接作为回复
+        raw = llm_response.strip()
+        if len(raw) > 10 and payload.get("type") != "system":
+            _log(f"[Brain] JSON 解析失败，将原文作为自然语言回复（{len(raw)}字）")
+            add_message_to_state(state, "karvis", raw)
+            _save_state_and_memory(state, {"memory_updates": []}, payload=payload,
+                                   reply=raw, elapsed=_time.time() - t_start, ctx=ctx)
+            return {"reply": raw}
         if payload.get("type") != "system":
             _save_to_quick_notes(payload, state, ctx)
         return {"reply": "已记录到 Obsidian"}
@@ -795,7 +776,7 @@ def process(payload, send_fn=None, ctx=None):
 
     # 7. Quick-Notes 两阶段过滤（V-Web-01）
     #    Stage 1: 规则预筛 — 已由 Skill handler 结构化处理的消息直接跳过
-    #    Stage 2: Flash 后判 — 回复发出后异步调 Flash 判断是否值得写入
+    #    Stage 2: 后判 — 回复发出后异步调模型判断是否值得写入
     primary_skill = _get_primary_skill(decision)
 
     # Reflect 防护 — reflect_pending 时，非 reflect skill 强制重路由（优先级低于 checkin）
@@ -812,7 +793,7 @@ def process(payload, send_fn=None, ctx=None):
         decision.pop("steps", None)
         primary_skill = "reflect.answer"
 
-    _pending_note_filter = False  # 是否需要 Flash 后判
+    _pending_note_filter = False  # 是否需要后判
     if payload.get("type") != "system" and primary_skill not in ("checkin.answer", "checkin.skip", "checkin.cancel", "checkin.start", "reflect.answer", "reflect.skip"):
         if primary_skill in _SKIP_NOTE_SKILLS:
             _log(f"[Brain][NoteFilter] 规则跳过: skill={primary_skill}")
@@ -820,7 +801,7 @@ def process(payload, send_fn=None, ctx=None):
             # 用户明确要求记录，直接写入
             _save_to_quick_notes(payload, state, ctx)
         else:
-            # 需要 Flash 后判（在回复发送后异步执行）
+            # 需要后判（在回复发送后异步执行）
             _pending_note_filter = True
 
     # 8. 执行 Steps（支持单步旧格式 + 多步 steps 格式）
@@ -860,7 +841,7 @@ def process(payload, send_fn=None, ctx=None):
     if llm_state_updates:
         state.update(llm_state_updates)
 
-    # 10. 智能回复路由：简单 skill 直接用 decision.reply，复杂场景走 Flash 二次加工
+    # 10. 智能回复路由：简单 skill 直接用 decision.reply，复杂场景走 Main 二次加工
     reply = _resolve_reply(user_text, decision, steps, step_results)
     _log(f"[Brain] 回复路由: reply={'有' if reply else '无'}({len(reply) if reply else 0}字)")
 
@@ -873,6 +854,33 @@ def process(payload, send_fn=None, ctx=None):
             reply = "已记录 ✅"
         elif primary_skill == "ignore":
             reply = "收到~"
+        elif primary_skill.startswith("internal."):
+            # internal.* 是中间步骤，回复为空说明 Agent Loop 未能生成回复
+            # → 重新调用主模型直接回答用户问题（带上已收集的上下文）
+            _log(f"[Brain] internal.* 兜底: skill={primary_skill}，重新调用模型处理用户问题")
+            try:
+                # 收集 Agent Loop 已获取的上下文
+                agent_ctx_parts = [f"用户问题: {user_text}"]
+                for sr in step_results:
+                    r = sr.get("result", {})
+                    if isinstance(r, dict) and r.get("agent_context"):
+                        agent_ctx_parts.append(f"已检索到的内容:\n{r['agent_context'][:3000]}")
+                    elif isinstance(r, dict) and r.get("reply"):
+                        agent_ctx_parts.append(f"已获取的数据:\n{r['reply'][:3000]}")
+                retry_msg = "\n\n".join(agent_ctx_parts)
+                retry_reply = call_llm([
+                    {"role": "system", "content": "你是用户的AI助手。基于以下已检索到的内容，直接回答用户的问题。如果信息不足以回答，诚实说明。用自然友好的语气回复。"},
+                    {"role": "user", "content": retry_msg}
+                ], model_tier="main", max_tokens=500, temperature=0.5)
+                if retry_reply and len(retry_reply.strip()) > 2:
+                    reply = retry_reply.strip()
+                    _log(f"[Brain] internal.* 兜底模型回复成功: {len(reply)}字")
+                else:
+                    reply = "我查了一下但没能整理出有用的信息，你可以换个关键词再试试~"
+                    _log(f"[Brain] internal.* 兜底模型回复为空，使用友好提示")
+            except Exception as e:
+                _log(f"[Brain] internal.* 兜底模型调用失败: {e}")
+                reply = "查找过程中遇到了问题，稍后再试试~"
         else:
             reply = "好的~"
             _log(f"[Brain] 兜底回复: skill={primary_skill} → '{reply}'")
@@ -888,9 +896,9 @@ def process(payload, send_fn=None, ctx=None):
         except Exception as e:
             _log(f"[Brain] 先行发送失败: {e}")
 
-    # V-Web-01: 回复发出后异步 Flash 过滤 Quick-Notes
+    # V-Web-01: 回复发出后异步过滤 Quick-Notes
     if _pending_note_filter:
-        _executor.submit(_flash_filter_and_save, payload, state, ctx, primary_skill)
+        _executor.submit(_note_filter_and_save, payload, state, ctx, primary_skill)
 
     # V8: 更新用户节奏画像（纯数据收集，不影响回复）
     try:
@@ -1005,6 +1013,9 @@ def _run_agent_loop(system_prompt, user_message, first_decision, first_context, 
     MAX_ROUNDS = 5
     ROUND_TIMEOUT = 30
 
+    # Agent Loop 中注入 skill 结果时的 JSON 格式提醒
+    _AGENT_STEP_REMINDER = "（请继续用严格 JSON 格式回复，把回复内容放在 reply 字段中，skill 设为对应值或 \"none\"，continue 设为 false）"
+
     # 构建对话历史
     messages = [
         {"role": "system", "content": system_prompt},
@@ -1016,14 +1027,43 @@ def _run_agent_loop(system_prompt, user_message, first_decision, first_context, 
             "type": "agent_step",
             "step": 1,
             "skill_result": first_context
-        }, ensure_ascii=False)}
+        }, ensure_ascii=False) + "\n" + _AGENT_STEP_REMINDER}
     ]
 
     last_decision = first_decision
     last_skill_result = {"success": True, "agent_context": first_context}
+    empty_result_count = 0  # 连续空结果计数
+
+    # 检查首次结果是否有效
+    if isinstance(first_context, dict):
+        files = first_context.get("files", None)
+        matches = first_context.get("matches", None)
+        if (files is not None and len(files) == 0) or (matches is not None and len(matches) == 0):
+            empty_result_count = 1
 
     for step in range(2, MAX_ROUNDS + 1):
         _log(f"[Brain][AgentLoop] 第 {step} 轮")
+
+        # 连续空结果过多 → 提前终止，让 LLM 用已有信息回答
+        if empty_result_count >= 2:
+            _log(f"[Brain][AgentLoop] 连续 {empty_result_count} 次空结果，提前终止并要求 LLM 直接回答")
+            # 注入终止提示
+            messages.append({"role": "user", "content": json.dumps({
+                "type": "agent_step",
+                "step": step,
+                "skill_result": {"note": "多次查询结果为空，请停止探索，直接基于已有信息回答用户问题。如果确实没有找到相关数据，请诚实告知用户。"},
+            }, ensure_ascii=False) + "\n（请回复 JSON，continue 设为 false，在 reply 中直接回答用户问题）"})
+            llm_response = call_llm(messages, model_tier="main", max_tokens=500, temperature=0.3)
+            if llm_response:
+                decision = _parse_llm_output(llm_response)
+                if decision:
+                    last_decision = decision
+                    last_decision["continue"] = False
+                else:
+                    last_decision["reply"] = llm_response.strip()
+                    last_decision["skill"] = "ignore"
+                    last_decision.pop("continue", None)
+            break
 
         # Agent Loop 中走 Main（后续可按 skill 动态选择 tier）
         llm_response = call_llm(messages, model_tier="main", max_tokens=500, temperature=0.3)
@@ -1033,7 +1073,11 @@ def _run_agent_loop(system_prompt, user_message, first_decision, first_context, 
 
         decision = _parse_llm_output(llm_response)
         if not decision:
-            _log(f"[Brain][AgentLoop] JSON 解析失败，终止循环")
+            # Agent Loop 中 LLM 直接返回自然语言回复（非 JSON），视为最终回复
+            _log(f"[Brain][AgentLoop] JSON 解析失败，将原文作为最终回复")
+            last_decision["reply"] = llm_response.strip()
+            last_decision["skill"] = "ignore"
+            last_decision.pop("continue", None)
             break
 
         last_decision = decision
@@ -1070,13 +1114,24 @@ def _run_agent_loop(system_prompt, user_message, first_decision, first_context, 
 
         last_skill_result = skill_result or {"success": True}
 
+        # 检测结果是否为空（空文件列表、空搜索结果）
+        if isinstance(agent_context, dict):
+            files = agent_context.get("files", None)
+            matches = agent_context.get("matches", None)
+            is_empty = (files is not None and len(files) == 0) or (matches is not None and len(matches) == 0)
+            if is_empty:
+                empty_result_count += 1
+                _log(f"[Brain][AgentLoop] 检测到空结果 (连续 {empty_result_count} 次)")
+            else:
+                empty_result_count = 0  # 有有效数据，重置计数
+
         # 追加到对话历史
         messages.append({"role": "assistant", "content": json.dumps(decision, ensure_ascii=False)})
         messages.append({"role": "user", "content": json.dumps({
             "type": "agent_step",
             "step": step,
             "skill_result": agent_context or {}
-        }, ensure_ascii=False)})
+        }, ensure_ascii=False) + "\n" + _AGENT_STEP_REMINDER})
 
     _log(f"[Brain][AgentLoop] 循环结束，最终 skill={last_decision.get('skill')}")
     return last_decision, last_skill_result
@@ -1084,21 +1139,7 @@ def _run_agent_loop(system_prompt, user_message, first_decision, first_context, 
 
 # ============ 辅助函数 ============
 
-# ── V4: Flash 回复层 — prompt 从 prompts 模块取 ──
 
-# ── V4: 不需要 Flash 加工的简单 skill ──
-_SIMPLE_SKILLS = frozenset({
-    "note.save", "classify.archive", "todo.add", "todo.done",
-    "checkin.start", "checkin.answer", "checkin.skip", "checkin.cancel",
-    "book.create", "book.excerpt", "book.thought", "book.summary", "book.quotes",
-    "media.create", "media.thought",
-    "mood.generate", "voice.journal",
-    "settings.nickname", "settings.ai_name", "settings.soul", "settings.info",
-    "web.token",
-    "habit.propose", "habit.nudge", "habit.status", "habit.complete",
-    "decision.record", "dynamic",
-    "reflect.push", "reflect.answer", "reflect.skip", "reflect.history",
-})
 
 # ── 速记智能过滤：规则预筛跳过集合（V-Web-01）──
 # 这些 skill 的消息已由对应 handler 结构化处理，无需重复写入 Quick-Notes
@@ -1111,6 +1152,7 @@ _SKIP_NOTE_SKILLS = frozenset({
     "web.token",
     "settings.nickname", "settings.ai_name", "settings.soul", "settings.info",
     "deep.dive",
+    "content.generate",
 })
 
 
@@ -1205,9 +1247,9 @@ def _execute_steps(decision, state, registry, ctx):
 
 def _resolve_reply(user_text, decision, steps, step_results):
     """
-    V4+V12: 智能回复路由。
-    简单 skill → 直接用 decision.reply 或 skill.reply
-    复杂场景 → Flash 二次加工
+    智能回复路由。
+    简单场景 → 直接用 decision.reply 或 skill.reply
+    复杂场景（有 agent_context 的 skill）→ 调 Main 模型二次加工
     V12: reply_override 优先（执行层权限拦截时使用）
     """
     all_skills = [s.get("skill", "ignore") for s in steps]
@@ -1223,31 +1265,16 @@ def _resolve_reply(user_text, decision, steps, step_results):
     if all_skills == ["ignore"] and llm_reply:
         return llm_reply
 
-    # 快速路径 2：所有 step 都是简单 skill
-    if all(s in _SIMPLE_SKILLS for s in all_skills):
-        # 优先用 skill 返回的 reply，其次用 LLM 预生成的 reply
-        for sr in step_results:
-            r = sr.get("result", {})
-            if isinstance(r, dict) and r.get("reply"):
-                return r["reply"]
+    # 快速路径 2：skill 返回了 reply，直接用
+    for sr in step_results:
+        r = sr.get("result", {})
+        if isinstance(r, dict) and r.get("reply"):
+            return r["reply"]
+    if llm_reply:
         return llm_reply
 
-    # 快速路径 3：单步且有 skill_reply 的简单 skill
-    if len(step_results) == 1 and all_skills[0] in _SIMPLE_SKILLS:
-        r = step_results[0].get("result", {})
-        return r.get("reply") if isinstance(r, dict) else llm_reply
-
-    # 复杂路径：需要 Flash 二次加工
-    _log(f"[Brain][V4] 触发 Flash 回复层: skills={all_skills}")
-    t0 = _time.time()
-    flash_reply = _call_flash_for_reply(user_text, decision, steps, step_results)
-    t1 = _time.time()
-    _log(f"[Brain][V4][耗时] Flash回复生成: {t1-t0:.1f}s")
-    return flash_reply or llm_reply
-
-
-def _call_flash_for_reply(user_text, decision, steps, step_results):
-    """V4: 调用 Flash 模型，基于用户意图 + skill 执行结果生成最终回复"""
+    # 复杂路径：有 agent_context 的 skill（如 wechat.search）需要 Main 模型基于数据生成回复
+    has_agent_context = False
     context_parts = []
     context_parts.append(f"用户消息: {user_text}")
     context_parts.append(f"AI 判断: {decision.get('thinking', '')}")
@@ -1260,29 +1287,47 @@ def _call_flash_for_reply(user_text, decision, steps, step_results):
         success = r.get("success", False)
         reply_data = r.get("reply", "")
         error = r.get("error", "")
+        agent_ctx = r.get("agent_context")
 
-        if success and reply_data:
+        if success and agent_ctx:
+            has_agent_context = True
+            ctx_text = agent_ctx.get("context_text", "")
+            if ctx_text:
+                context_parts.append(f"操作{i+1} [{skill_name}] 成功，搜索到 {agent_ctx.get('total', '?')} 条结果:\n{ctx_text}")
+            elif agent_ctx.get("matches") is not None:
+                context_parts.append(f"操作{i+1} [{skill_name}] 成功，共 {agent_ctx.get('total', 0)} 条匹配")
+            elif agent_ctx.get("files") is not None:
+                context_parts.append(f"操作{i+1} [{skill_name}] 成功，目录下有 {len(agent_ctx['files'])} 个文件")
+            else:
+                context_parts.append(f"操作{i+1} [{skill_name}] 成功，数据: {json.dumps(agent_ctx, ensure_ascii=False)[:500]}")
+        elif success and reply_data:
             context_parts.append(f"操作{i+1} [{skill_name}] 成功，数据:\n{reply_data}")
         elif success:
             context_parts.append(f"操作{i+1} [{skill_name}] 成功")
         else:
             context_parts.append(f"操作{i+1} [{skill_name}] 失败: {error or reply_data}")
 
-    llm_reply = decision.get("reply", "")
-    if llm_reply:
-        context_parts.append(f"AI 预生成回复（仅供参考）: {llm_reply}")
+    if not has_agent_context:
+        # 没有 agent_context，不需要二次加工
+        return llm_reply
 
+    # 有 agent_context，调 Main 模型生成回复
+    _log(f"[Brain] 触发 Main 回复层: skills={all_skills}")
+    t0 = _time.time()
     context = "\n".join(context_parts)
-
     try:
         reply = call_llm([
             {"role": "system", "content": prompts.FLASH_REPLY},
             {"role": "user", "content": context}
-        ], model_tier="flash", max_tokens=300, temperature=0.5)
-        return reply
+        ], model_tier="main", max_tokens=300, temperature=0.5)
+        t1 = _time.time()
+        _log(f"[Brain][耗时] Main回复生成: {t1-t0:.1f}s")
+        if reply:
+            return reply.strip()
     except Exception as e:
-        _log(f"[Brain][V4] Flash 回复生成失败: {e}")
-        return None
+        _log(f"[Brain] Main 回复生成失败: {e}")
+
+    return llm_reply
 
 def _save_to_quick_notes(payload, state, ctx):
     """所有用户消息统一写入 Quick-Notes（原始流水记录）"""
@@ -1314,8 +1359,8 @@ def _save_to_quick_notes(payload, state, ctx):
     except Exception as e:
         _log(f"[Brain] Quick-Notes 统一写入失败（不影响主流程）: {e}")
 
-def _flash_filter_and_save(payload, state, ctx, primary_skill):
-    """回复后异步执行：用 Flash 判断消息是否值得写入 Quick-Notes（V-Web-01）"""
+def _note_filter_and_save(payload, state, ctx, primary_skill):
+    """回复后异步执行：用 Main 模型判断消息是否值得写入 Quick-Notes（V-Web-01）"""
     text = _extract_user_text(payload)
     if not text or not text.strip():
         return
@@ -1323,15 +1368,15 @@ def _flash_filter_and_save(payload, state, ctx, primary_skill):
         result = call_llm([
             {"role": "system", "content": prompts.FLASH_NOTE_FILTER},
             {"role": "user", "content": text}
-        ], model_tier="flash", max_tokens=5, temperature=0)
+        ], model_tier="main", max_tokens=5, temperature=0)
         should_save = result and result.strip().upper().startswith("YES")
         if should_save:
             _save_to_quick_notes(payload, state, ctx)
-            _log(f"[Brain][NoteFilter] Flash判断写入: skill={primary_skill}, text={text[:40]}...")
+            _log(f"[Brain][NoteFilter] 判断写入: skill={primary_skill}, text={text[:40]}...")
         else:
-            _log(f"[Brain][NoteFilter] Flash判断跳过: skill={primary_skill}, text={text[:40]}...")
+            _log(f"[Brain][NoteFilter] 判断跳过: skill={primary_skill}, text={text[:40]}...")
     except Exception as e:
-        _log(f"[Brain][NoteFilter] Flash判断失败，兜底写入: {e}")
+        _log(f"[Brain][NoteFilter] 判断失败，兜底写入: {e}")
         _save_to_quick_notes(payload, state, ctx)
 
 
@@ -1456,9 +1501,23 @@ def _parse_llm_output(text):
         try:
             return json.loads(text[start:end + 1])
         except json.JSONDecodeError:
+            # JSON 块存在但解析失败，尝试提取 JSON 前后的自然语言
             pass
 
-    _log(f"[Brain] 无法解析 JSON: {text[:200]}")
+    # 兜底：LLM 输出了纯自然语言（非 JSON），自动包装为 decision 结构
+    # 这在 Agent Loop 后续轮次中最常见：LLM 拿到 skill 结果后直接给出回复文本
+    if len(text) > 10:
+        _log(f"[Brain] 非 JSON 输出，自动包装为 reply（{len(text)}字）: {text[:100]}")
+        return {
+            "thinking": "LLM 直接输出自然语言回复",
+            "skill": "none",
+            "params": {},
+            "reply": text,
+            "memory_updates": [],
+            "continue": False
+        }
+
+    _log(f"[Brain] 无法解析 JSON 且内容过短: {text[:200]}")
     return None
 
 

@@ -122,6 +122,22 @@ def search_files(params, state, ctx):
             files_to_read[f"work_{d}"] = f"{ctx.work_notes_dir}/{d}.md"
             files_to_read[f"fun_{d}"] = f"{ctx.fun_notes_dir}/{d}.md"
 
+    if scope in ("wechat", "all"):
+        # 扫描 03-WeChat 各子目录下的文件
+        import os
+        for subdir_name, subdir_path in [
+            ("wechat_notes", ctx.wechat_notes_dir),
+            ("wechat_favorites", ctx.wechat_favorites_dir),
+            ("wechat_articles", ctx.wechat_articles_dir),
+        ]:
+            if os.path.isdir(subdir_path):
+                for fname in os.listdir(subdir_path):
+                    if fname.startswith(".") or fname.startswith("_"):
+                        continue
+                    ext = fname.rsplit(".", 1)[-1].lower() if "." in fname else ""
+                    if ext in ("md", "txt", "html"):
+                        files_to_read[f"{subdir_name}_{fname}"] = os.path.join(subdir_path, fname)
+
     futures = {k: executor.submit(ctx.IO.read_text, v) for k, v in files_to_read.items()}
     results_text = {}
     for k, fut in futures.items():
@@ -165,27 +181,63 @@ def list_files(params, state, ctx):
 
     params:
         directory: str — 目录路径（相对于 OBSIDIAN_BASE）
+                   特殊值: "笔记" → 自动映射到 03-WeChat/笔记
+                          "收藏" → 自动映射到 03-WeChat/收藏
+                          "公众号" → 自动映射到 03-WeChat/公众号
     """
     directory = params.get("directory", "")
     if not directory:
-        return {"success": False, "reply": "没有指定目录路径"}
-
-    if directory.startswith("/"):
-        if not directory.startswith(ctx.base_dir):
-            return {"success": False, "reply": "不允许访问该目录"}
-        full_path = directory
+        # 未指定目录 → 默认列出 03-WeChat/笔记（最常用场景）
+        _log(f"[internal_ops] list 未指定目录，默认使用 wechat_notes_dir")
+        full_path = ctx.wechat_notes_dir
     else:
-        full_path = f"{ctx.base_dir}/{directory}"
+        # 关键词自动映射到正确的 ctx 路径
+        _DIR_ALIASES = {
+            "笔记": "wechat_notes_dir",
+            "日记": "wechat_notes_dir",
+            "收藏": "wechat_favorites_dir",
+            "公众号": "wechat_articles_dir",
+        }
+        # 检查 directory 是否匹配别名（精确匹配或包含关键词）
+        mapped = False
+        for alias, attr in _DIR_ALIASES.items():
+            if directory == alias or directory.endswith(f"/{alias}") or directory.endswith(f"/{alias}/"):
+                full_path = getattr(ctx, attr, "")
+                if full_path:
+                    _log(f"[internal_ops] list 别名映射: '{directory}' → {full_path}")
+                    mapped = True
+                break
+
+        if not mapped:
+            if directory.startswith("/"):
+                if not directory.startswith(ctx.base_dir):
+                    return {"success": False, "reply": "不允许访问该目录"}
+                full_path = directory
+            else:
+                full_path = f"{ctx.base_dir}/{directory}"
 
     # 通过 ctx.IO 列出文件（兼容 OneDrive）
     try:
         children = ctx.IO.list_children(full_path)
         if children is None:
-            return {"success": False, "reply": f"目录不存在或无法访问: {full_path}"}
+            _log(f"[internal_ops] list 目录不存在或无法访问: {full_path}")
+            return {
+                "success": False,
+                "agent_context": {"error": f"目录不存在或无法访问: {full_path}", "directory": full_path, "files": []},
+                "reply": None
+            }
+        if not children:
+            _log(f"[internal_ops] list 目录为空: {full_path}")
+            return {
+                "success": True,
+                "agent_context": {"directory": full_path, "files": [], "note": "该目录为空，没有任何文件或子目录。请尝试其他目录，或使用 internal.search 直接按关键词搜索。"},
+                "reply": None
+            }
         file_list = [
             {"name": c["name"], "type": "folder" if "folder" in c else "file"}
             for c in sorted(children, key=lambda x: x.get("name", ""))[:30]
         ]
+        _log(f"[internal_ops] list 成功: {full_path} → {len(file_list)} 项")
         return {
             "success": True,
             "reply": None,
@@ -193,7 +245,11 @@ def list_files(params, state, ctx):
         }
     except Exception as e:
         _log(f"[internal_ops] list 异常: {e}")
-        return {"success": False, "reply": f"目录读取异常: {e}"}
+        return {
+            "success": False,
+            "agent_context": {"error": f"目录读取异常: {e}", "directory": full_path, "files": []},
+            "reply": None
+        }
 
 
 # ============ Skill 热加载注册表 ============

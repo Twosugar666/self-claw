@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # KarvisForYou — 多用户 AI 生活助手
 
 > 基于企业微信应用的 AI 生活助手，支持微信聊天置顶，支持多人共享一套部署，每人拥有独立的数据空间。
@@ -263,3 +264,6 @@ data/
 ## License
 
 [MIT](LICENSE)
+=======
+# self-claw
+>>>>>>> 7aec3e50f15203f1288c55f31b4ad70708dc936a

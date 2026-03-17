@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-KarvisForAll Web 路由 — API 接口 + 页面路由
+XiaoWe Web 路由 — API 接口 + 页面路由
 所有 /web/* 和 /api/* 路由在此注册。
 """
 import os
@@ -20,7 +20,7 @@ from user_context import (
     create_announcement, get_announcements, delete_announcement,
     create_feedback, get_feedbacks, reply_feedback,
 )
-from config import ADMIN_TOKEN, LOG_FILE_KARVISFORALL
+from config import ADMIN_TOKEN, LOG_FILE_XIAOWE
 
 _BEIJING_TZ = timezone(timedelta(hours=8))
 
@@ -41,7 +41,7 @@ def _get_token_from_request():
     """从请求中提取 token（Header > Cookie > query param）"""
     token = request.headers.get("X-Token", "")
     if not token:
-        token = request.cookies.get("karvis_token", "")
+        token = request.cookies.get("xiaowe_token", "")
     if not token:
         token = request.args.get("token", "")
     return token
@@ -56,7 +56,7 @@ def require_auth(f):
         if not result.get("valid"):
             _log(f"[WebAPI] 鉴权失败: token={token[:8] if token else 'empty'}..., "
                  f"expired={result.get('expired', False)}")
-            return jsonify({"error": "令牌无效或已过期，请在企微中对 Karvis 说「给我查看链接」重新获取",
+            return jsonify({"error": "令牌无效或已过期，请在企微中对 XiaoWe 说「给我查看链接」重新获取",
                             "expired": result.get("expired", False)}), 401
         kwargs["user_id"] = result["user_id"]
         return f(*args, **kwargs)
@@ -71,7 +71,7 @@ def require_admin(f):
         if not token:
             token = request.args.get("admin_token", "")
         if not token:
-            token = request.cookies.get("karvis_admin_token", "")
+            token = request.cookies.get("xiaowe_admin_token", "")
         if not ADMIN_TOKEN or token != ADMIN_TOKEN:
             _log(f"[WebAPI] 管理员鉴权失败")
             return jsonify({"error": "管理员令牌无效"}), 403
@@ -591,7 +591,7 @@ def api_settings(user_id=None):
     cfg = ctx.config
     safe_cfg = {
         "nickname": cfg.get("nickname", ""),
-        "ai_name": cfg.get("ai_name", "Karvis"),
+        "ai_name": cfg.get("ai_name", "XiaoWe"),
         "soul_override": cfg.get("soul_override", ""),
         "preferences": {
             "morning_report": cfg.get("preferences", {}).get("morning_report", True),
@@ -682,7 +682,7 @@ def api_reflect(user_id=None):
     state = _read_state_safe(ctx)
 
     # 读取 reflect_log.jsonl（始终本地存储）
-    log_path = os.path.join(ctx.base_dir, "_Karvis", "reflect", "reflect_log.jsonl")
+    log_path = os.path.join(ctx.base_dir, "_XiaoWe", "reflect", "reflect_log.jsonl")
     entries = []
     if os.path.exists(log_path):
         try:
@@ -925,7 +925,7 @@ def api_admin_stats():
     decisions = []
     users_dir = os.path.join(DATA_DIR, "users")
     try:
-        decision_files = glob.glob(os.path.join(users_dir, "*", "_Karvis", "logs", "decisions.jsonl"))
+        decision_files = glob.glob(os.path.join(users_dir, "*", "_XiaoWe", "logs", "decisions.jsonl"))
         for df in decision_files:
             uid = os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(df))))
             with open(df, "r", encoding="utf-8") as f:
@@ -1040,9 +1040,9 @@ def _aggregate_error_logs():
     from collections import deque
     error_groups = []
     try:
-        if not os.path.exists(LOG_FILE_KARVISFORALL):
+        if not os.path.exists(LOG_FILE_XIAOWE):
             return []
-        with open(LOG_FILE_KARVISFORALL, "r", encoding="utf-8", errors="replace") as f:
+        with open(LOG_FILE_XIAOWE, "r", encoding="utf-8", errors="replace") as f:
             lines = list(deque(f, maxlen=5000))  # 最近 5000 行
 
         seen = {}  # {error_key: {count, last_ts, sample}}
@@ -1158,7 +1158,7 @@ def api_admin_user_detail(uid):
     # 1. 基本配置
     result["config"] = {
         "nickname": config.get("nickname", ""),
-        "ai_name": config.get("ai_name", "Karvis"),
+        "ai_name": config.get("ai_name", "XiaoWe"),
         "role": config.get("role", "user"),
         "storage_mode": config.get("storage_mode", "local"),
         "onboarding_step": config.get("onboarding_step", 0),
@@ -1344,12 +1344,12 @@ def api_admin_logs():
 
     # 读取 V12 服务日志
     try:
-        if os.path.exists(LOG_FILE_KARVISFORALL):
-            with open(LOG_FILE_KARVISFORALL, "r", encoding="utf-8", errors="replace") as f:
+        if os.path.exists(LOG_FILE_XIAOWE):
+            with open(LOG_FILE_XIAOWE, "r", encoding="utf-8", errors="replace") as f:
                 log_lines = list(deque(f, maxlen=lines))
             log_lines = [l.rstrip("\n") for l in log_lines]
         else:
-            log_lines = [f"[WARN] 日志文件不存在: {LOG_FILE_KARVISFORALL}"]
+            log_lines = [f"[WARN] 日志文件不存在: {LOG_FILE_XIAOWE}"]
     except Exception as e:
         log_lines = [f"[ERROR] 读取日志失败: {e}"]
 
@@ -1366,7 +1366,7 @@ def api_admin_logs():
     if level and level != "ALL":
         log_lines = [l for l in log_lines if level in l.upper()]
 
-    return jsonify({"lines": log_lines, "total": len(log_lines), "project": "karvisforall"})
+    return jsonify({"lines": log_lines, "total": len(log_lines), "project": "xiaowe"})
 
 
 # ============================================================

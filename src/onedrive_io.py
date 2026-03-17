@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-KarvisForAll V12 — OneDrive 统一读写层（实例模式）
-从 Karvis 单用户版移植，改造要点：
+XiaoWe V12 — OneDrive 统一读写层（实例模式）
+从 XiaoWe 单用户版移植，改造要点：
   1. 所有 @classmethod → 实例方法，凭证由构造函数注入
   2. token 缓存为实例级别（支持多个 OneDrive 账号并发）
   3. 内置三级缓存 (内存 → /tmp → OneDrive API) 降低延迟
@@ -37,7 +37,7 @@ _graph_session.mount("https://graph.microsoft.com", _graph_adapter)
 _auth_session = requests.Session()
 
 # /tmp 磁盘缓存目录
-_DISK_CACHE_DIR = "/tmp/karvis_od_cache"
+_DISK_CACHE_DIR = "/tmp/xiaowe_od_cache"
 
 
 class OneDriveIO:

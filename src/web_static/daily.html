@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Karvis · 日记</title>
+<title>XiaoWe · 日记</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -51,8 +51,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
     <div x-show="!filtered.length" class="text-center py-16">
       <p class="text-4xl mb-3">📖</p>
       <p class="text-warm-600 font-medium">还没有日记</p>
-      <p class="text-warm-400 text-sm mt-1">Karvis 会在每晚自动帮你生成日报和情绪日记</p>
-      <p class="text-warm-400 text-xs mt-3">💡 多和 Karvis 聊天，日记会更丰富哦~</p>
+      <p class="text-warm-400 text-sm mt-1">XiaoWe 会在每晚自动帮你生成日报和情绪日记</p>
+      <p class="text-warm-400 text-xs mt-3">💡 多和 XiaoWe 聊天，日记会更丰富哦~</p>
     </div>
   </div>
 
@@ -77,8 +77,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
   </nav>
 
 <script>
-const API_HEADERS = () => ({'X-Token': localStorage.getItem('karvis_token')||''});
-function checkAuth() { if(!localStorage.getItem('karvis_token')) location.href='/web/login'; }
+const API_HEADERS = () => ({'X-Token': localStorage.getItem('xiaowe_token')||''});
+function checkAuth() { if(!localStorage.getItem('xiaowe_token')) location.href='/web/login'; }
 
 function dailyApp() {
   return {
@@ -96,7 +96,7 @@ function dailyApp() {
       checkAuth();
       try {
         const r = await fetch('/api/daily', {headers: API_HEADERS()});
-        if (r.status === 401) { localStorage.removeItem('karvis_token'); location.href='/web/login'; return; }
+        if (r.status === 401) { localStorage.removeItem('xiaowe_token'); location.href='/web/login'; return; }
         this.reports = (await r.json()).reports || [];
       } catch(e) { console.error(e); }
       this.loading = false;

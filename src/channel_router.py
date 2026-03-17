@@ -47,7 +47,7 @@ def get_user_channel(user_id):
     # 其他情况尝试读 user_config.json
     try:
         from user_context import DATA_DIR
-        config_file = os.path.join(DATA_DIR, "users", user_id, "_Karvis", "user_config.json")
+        config_file = os.path.join(DATA_DIR, "users", user_id, "_XiaoWe", "user_config.json")
         if os.path.exists(config_file):
             with open(config_file, "r", encoding="utf-8") as f:
                 config = json.load(f)

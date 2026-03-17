@@ -1,4 +1,4 @@
-GitHub 开源地址：[sameencai/KarvisForYou](https://github.com/sameencai/KarvisForYou) | 官网：[karvis.top](https://karvis.top)
+GitHub 开源地址：[sameencai/XiaoWe](https://github.com/sameencai/XiaoWe) | 官网：[xiaowe.top](https://xiaowe.top)
 
 ![](images/Pasted%20image%2020260310141909.png)
 
@@ -77,9 +77,9 @@ GitHub 开源地址：[sameencai/KarvisForYou](https://github.com/sameencai/Karv
 
 **如果你也想搭建什么 AI 应用，推荐考虑这个路径。**
 
-再说代码。Karvis 的所有代码都是用 **CodeBuddy** 写的。准确说，是我描述需求，CodeBuddy 写代码。我调试、测试、提反馈，它改。就这样，春节在家两周来回迭代了 12 个版本。
+再说代码。XiaoWe 的所有代码都是用 **CodeBuddy** 写的。准确说，是我描述需求，CodeBuddy 写代码。我调试、测试、提反馈，它改。就这样，春节在家两周来回迭代了 12 个版本。
 
-举个例子——你现在看到的这个产品官网 [karvis.top](https://karvis.top)。
+举个例子——你现在看到的这个产品官网 [xiaowe.top](https://xiaowe.top)。
 
 是我用 CodeBuddy **5 分钟搭起来的**：
 
@@ -103,7 +103,7 @@ GitHub 开源地址：[sameencai/KarvisForYou](https://github.com/sameencai/Karv
 
 ----
 
-## 四、Karvis 能做什么？
+## 四、XiaoWe 能做什么？
 
 
 48 项能力，一个入口。在微信里说句话，剩下的它来。
@@ -116,7 +116,7 @@ GitHub 开源地址：[sameencai/KarvisForYou](https://github.com/sameencai/Karv
 ### 📝 智能记录
 
 
-不用打开任何 App。在微信里随便说一句，Karvis 自动帮你分类、归档、写进 Obsidian 知识库。回到家打开电脑，笔记已经躺好了。
+不用打开任何 App。在微信里随便说一句，XiaoWe 自动帮你分类、归档、写进 Obsidian 知识库。回到家打开电脑，笔记已经躺好了。
 
 <img src="images/Pasted%20image%2020260310142038.png" width="360">
 ### ✅ 待办管理
@@ -177,7 +177,7 @@ GitHub 开源地址：[sameencai/KarvisForYou](https://github.com/sameencai/Karv
 ## 六、延伸畅想：每个人一个小秘书
 
 
-做完 Karvis 之后，我开始想一个更大的事情：
+做完 XiaoWe 之后，我开始想一个更大的事情：
 
 **如果每个人都有一个这样的 AI 小秘书呢？**
 
@@ -193,7 +193,7 @@ GitHub 开源地址：[sameencai/KarvisForYou](https://github.com/sameencai/Karv
 
 **那如果这个电脑配的是一个 AI 呢？**
 
-这自然让我联想到了我们团队的业务——游戏知几。我们的 slogan 是「懂游戏更懂你」。做 Karvis 的过程，让我无比具象地体验到了什么叫**"一个真正懂你的 AI 助手"**。它不是冷冰冰的问答机器，而是有记忆、有温度、能主动关怀的伙伴。
+这自然让我联想到了我们团队的业务——游戏知几。我们的 slogan 是「懂游戏更懂你」。做 XiaoWe 的过程，让我无比具象地体验到了什么叫**"一个真正懂你的 AI 助手"**。它不是冷冰冰的问答机器，而是有记忆、有温度、能主动关怀的伙伴。
 
 如果"知几"也能成为每个玩家专属的"微信级"游戏 AI 助手：
 
@@ -212,17 +212,17 @@ GitHub 开源地址：[sameencai/KarvisForYou](https://github.com/sameencai/Karv
 ## 七、写在最后
 
 
-这篇文章的构思，其实是在回家开车的路上用语音输入记下来的。没什么逻辑地说了很多，但意思都在——然后 Karvis 帮我整理好了。
+这篇文章的构思，其实是在回家开车的路上用语音输入记下来的。没什么逻辑地说了很多，但意思都在——然后 XiaoWe 帮我整理好了。
 
 这就是我想要的：**不用刻意坐下来记录，而是在生活的间隙，随手说句话，它帮你沉淀一切。**
 
-Karvis 已经开源。如果你也想拥有一个住在微信里的 AI 伙伴，欢迎来 GitHub 看看，Fork 回去改成你自己的版本。
+XiaoWe 已经开源。如果你也想拥有一个住在微信里的 AI 伙伴，欢迎来 GitHub 看看，Fork 回去改成你自己的版本。
 
-🔗 **GitHub：** [github.com/sameencai/KarvisForYou](https://github.com/sameencai/KarvisForYou)
+🔗 **GitHub：** [github.com/sameencai/XiaoWe](https://github.com/sameencai/XiaoWe)
 
-**简单用法：**直接对codebuddy说，帮我在本地部署一下这个项目：https://github.com/sameencai/KarvisForYou  。
+**简单用法：**直接对codebuddy说，帮我在本地部署一下这个项目：https://github.com/sameencai/XiaoWe  。
 
 
 如果有问题的话，相信他会帮你搞定。
 
-🌐 **官网：** [karvis.top](https://karvis.top)
+🌐 **官网：** [xiaowe.top](https://xiaowe.top)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-KarvisForAll 数据隔离测试
+XiaoWe 数据隔离测试
 模拟多用户场景，验证：
 1. 用户目录结构独立
 2. 用户注册表正确记录
@@ -11,9 +11,9 @@ KarvisForAll 数据隔离测试
 7. 并发安全
 
 运行方式:
-    cd KarvisForAll/src && python -m pytest ../tests/test_isolation.py -v
+    cd XiaoWe/src && python -m pytest ../tests/test_isolation.py -v
     或:
-    cd KarvisForAll && python tests/test_isolation.py
+    cd XiaoWe && python tests/test_isolation.py
 """
 import os
 import sys
@@ -28,7 +28,7 @@ _src_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "src")
 sys.path.insert(0, _src_dir)
 
 # 使用临时目录作为 DATA_DIR，避免污染真实数据
-_test_data_dir = tempfile.mkdtemp(prefix="karvis_test_")
+_test_data_dir = tempfile.mkdtemp(prefix="xiaowe_test_")
 os.environ["DATA_DIR"] = _test_data_dir
 os.environ["ADMIN_TOKEN"] = "test-admin-token-12345"
 os.environ["DAILY_MESSAGE_LIMIT"] = "5"
@@ -430,7 +430,7 @@ def test_flask_api_e2e():
 def main():
     global _pass_count, _fail_count
 
-    print(f"\nKarvisForAll 数据隔离测试")
+    print(f"\nXiaoWe 数据隔离测试")
     print(f"测试数据目录: {_test_data_dir}")
     print(f"DATA_DIR: {DATA_DIR}")
 

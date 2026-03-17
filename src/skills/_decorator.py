@@ -79,7 +79,7 @@ def generate_skills_prompt():
 
 def generate_skills_doc():
     """从装饰器元数据自动生成 Skill 文档（Markdown）"""
-    lines = ["# Karvis Skills 一览\n"]
+    lines = ["# XiaoWe Skills 一览\n"]
     groups = {}
     for name, meta in sorted(_skill_metadata.items()):
         g = meta["group"]

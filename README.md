@@ -1,5 +1,5 @@
 <<<<<<< HEAD
-# KarvisForYou — 多用户 AI 生活助手
+# XiaoWe — 多用户 AI 生活助手
 
 > 基于企业微信应用的 AI 生活助手，支持微信聊天置顶，支持多人共享一套部署，每人拥有独立的数据空间。
 > 记速记、管待办、写日记、追情绪、养习惯、记账理财——通过对话完成一切。
@@ -122,8 +122,8 @@ brain.process()
 ### 部署方式一：一键脚本
 
 ```bash
-git clone https://github.com/sameencai/KarvisForYou.git
-cd KarvisForYou
+git clone https://github.com/sameencai/XiaoWe.git
+cd XiaoWe
 chmod +x setup.sh
 ./setup.sh
 ```
@@ -131,8 +131,8 @@ chmod +x setup.sh
 ### 部署方式二：Docker
 
 ```bash
-git clone https://github.com/sameencai/KarvisForYou.git
-cd KarvisForYou
+git clone https://github.com/sameencai/XiaoWe.git
+cd XiaoWe
 cp .env.example src/.env
 nano src/.env          # 填入配置
 cd deploy
@@ -142,7 +142,7 @@ docker-compose up -d
 ### 部署方式三：手动
 
 ```bash
-cd KarvisForYou/src
+cd XiaoWe/src
 pip3 install -r requirements.txt
 cp ../.env.example .env
 nano .env              # 填入配置
@@ -193,7 +193,7 @@ python3 app.py
 ## 项目结构
 
 ```
-KarvisForYou/
+XiaoWe/
 ├── setup.sh                 # 一键安装脚本
 ├── .env.example             # 配置模板
 ├── src/                     # 核心代码
@@ -228,7 +228,7 @@ KarvisForYou/
 
 ```
 data/
-├── _karvis_system/          # 系统数据
+├── _xiaowe_system/          # 系统数据
 │   ├── user_registry.json   # 用户注册表
 │   ├── token_store.json     # Web 令牌
 │   └── usage_log.json       # LLM 用量日志
@@ -237,7 +237,7 @@ data/
         ├── 00-Inbox/        # 速记、待办、状态
         ├── 01-Daily/        # 日报、周报、月报
         ├── 02-Notes/        # 分类笔记
-        └── _Karvis/         # 记忆、配置、日志
+        └── _XiaoWe/         # 记忆、配置、日志
 ```
 
 ---
@@ -257,7 +257,7 @@ data/
 
 ## 官网
 
-🔗 **https://karvis.top**
+🔗 **https://xiaowe.top**
 
 ---
 

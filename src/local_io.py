@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-KarvisForAll 本地文件读写层
+XiaoWe 本地文件读写层
 多用户版：路径由 UserContext 生成，LocalFileIO 直接使用传入的绝对路径。
 """
 import os

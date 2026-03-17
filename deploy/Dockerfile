@@ -10,7 +10,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src/ ./src/
 
 # 创建数据目录（多用户数据 + 系统数据）
-RUN mkdir -p /app/data/_karvis_system
+RUN mkdir -p /app/data/_xiaowe_system
 
 # 设置数据目录环境变量
 ENV DATA_DIR=/app/data

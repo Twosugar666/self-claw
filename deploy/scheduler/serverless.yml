@@ -1,12 +1,12 @@
-# serverless.yml - Karvis 定时调度器配置
+# serverless.yml - XiaoWe 定时调度器配置
 # 部署到腾讯云 SCF 时使用（需安装 Serverless Framework）
 
 component: scf
-name: karvis-scheduler
-app: karvis-scheduler
+name: xiaowe-scheduler
+app: xiaowe-scheduler
 
 inputs:
-  name: karvis-scheduler
+  name: xiaowe-scheduler
   region: ap-guangzhou          # 改为你的 SCF 区域
   runtime: Python3.9
   handler: index.main_handler
@@ -16,7 +16,7 @@ inputs:
   environment:
     variables:
       TZ: Asia/Shanghai
-      KARVIS_SYSTEM_URL: https://your-scf-url.tencentscf.com/system   # 改为你的 Karvis 公网 URL
+      XIAOWE_SYSTEM_URL: https://your-scf-url.tencentscf.com/system   # 改为你的 XiaoWe 公网 URL
 
   events:
     # 缓存刷新 - 每30分钟

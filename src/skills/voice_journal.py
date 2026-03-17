@@ -20,7 +20,7 @@ tags: [voice-journal]
 ## 你说了什么
 （整理后的 ASR 文本，分段，去口语化重复）
 
-## Karvis 的整理
+## XiaoWe 的整理
 **主题**：xxx
 **情绪轨迹**：xxx → xxx → xxx
 **关键洞察**：xxx
@@ -169,8 +169,8 @@ def _build_journal_content(date_str, time_period, asr_text, analysis, attachment
         "",
     ]
 
-    # Karvis 的整理
-    parts.append("## Karvis 的整理")
+    # XiaoWe 的整理
+    parts.append("## XiaoWe 的整理")
     parts.append("")
     parts.append(f"**主题**：{theme}")
     if mood:

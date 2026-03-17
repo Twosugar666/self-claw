@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Karvis 消息网关
+XiaoWe 消息网关
 职责：接收企微消息 → 下载媒体/ASR → 构造 payload → 交给 brain.process()
 不做任何业务判断，所有逻辑由大脑决定。
 """
@@ -422,7 +422,7 @@ def _fetch_link_content(url):
 
 def build_payload(msg, ctx):
     """
-    将企微原始消息转换为 Karvis payload。
+    将企微原始消息转换为 XiaoWe payload。
     处理媒体下载、附件上传、ASR，但不做任何业务判断。
     返回 payload dict。
     """
@@ -435,7 +435,7 @@ def build_payload(msg, ctx):
         content = msg.get('content', '')
         if content.startswith('/help') or content.startswith('帮助'):
             # 帮助命令直接在网关层处理
-            return None, 'Karvis 🤖\n\n发送任何内容，我会帮你记录到 Obsidian。\n支持：文字、图片、语音、视频、链接\n\n打卡相关：说"打卡"开始每日复盘'
+            return None, 'XiaoWe 🤖\n\n发送任何内容，我会帮你记录到 Obsidian。\n支持：文字、图片、语音、视频、链接\n\n打卡相关：说"打卡"开始每日复盘'
         payload["type"] = "text"
         payload["text"] = content
         # F1: 检测纯 URL 文本，自动抓取网页正文
@@ -569,14 +569,14 @@ def handle_message(msg, user_id):
             is_telegram = user_id.startswith("tg_")
             if is_telegram:
                 welcome = (
-                    "Hi~ I'm Karvis 🤖\n"
+                    "Hi~ I'm XiaoWe 🤖\n"
                     "Your AI life assistant.\n\n"
                     "Let's get to know each other! What should I call you?\n"
                     "(Just say \"Call me XX\")"
                 )
             else:
                 welcome = (
-                    "嗨～我是 Karvis 🤖\n"
+                    "嗨～我是 XiaoWe 🤖\n"
                     "你的 AI 生活助手，住在企业微信里。\n\n"
                     "先认识一下吧，你希望我怎么称呼你？\n"
                     "（直接说「叫我XX」就好~）"
@@ -1122,7 +1122,7 @@ def _run_system_action_for_user(action, data, uid, ctx):
 @app.route('/', methods=['GET'])
 def health():
     """健康检查（基础 — 用于负载均衡探活）"""
-    return "Karvis is alive"
+    return "XiaoWe is alive"
 
 
 @app.route('/health', methods=['GET'])
@@ -1177,9 +1177,9 @@ def health_detail():
 
     # 6. 日志文件大小
     try:
-        from config import LOG_FILE_KARVISFORALL
-        if os.path.exists(LOG_FILE_KARVISFORALL):
-            log_size_mb = os.path.getsize(LOG_FILE_KARVISFORALL) / (1024 * 1024)
+        from config import LOG_FILE_XIAOWE
+        if os.path.exists(LOG_FILE_XIAOWE):
+            log_size_mb = os.path.getsize(LOG_FILE_XIAOWE) / (1024 * 1024)
             checks["log_size_mb"] = round(log_size_mb, 1)
             if log_size_mb > 100:
                 checks["log_warning"] = "日志文件超过 100MB"

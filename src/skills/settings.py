@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-KarvisForAll 对话式设置
+XiaoWe 对话式设置
 通过自然语言设置昵称、AI 风格、个人信息。
 """
 import sys
@@ -65,7 +65,7 @@ def set_ai_name(params, state, ctx):
             {
                 "section": "关键偏好",
                 "action": "upsert",
-                "content": f"用户给 Karvis 起了昵称「{ai_name}」，喜欢被叫这个名字"
+                "content": f"用户给 XiaoWe 起了昵称「{ai_name}」，喜欢被叫这个名字"
             }
         ]
     }

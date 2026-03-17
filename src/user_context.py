@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-KarvisForAll V12 用户上下文管理
+XiaoWe V12 用户上下文管理
 每个用户请求携带 UserContext，封装该用户的所有路径、IO 后端和配置。
 
 V12 改造要点：
@@ -28,7 +28,7 @@ def _log(msg):
 _project_root = os.path.dirname(os.path.dirname(__file__))
 DATA_DIR = os.environ.get("DATA_DIR", os.path.join(_project_root, "data"))
 
-SYSTEM_DIR = os.path.join(DATA_DIR, "_karvis_system")
+SYSTEM_DIR = os.path.join(DATA_DIR, "_xiaowe_system")
 USER_REGISTRY_FILE = os.path.join(SYSTEM_DIR, "users.json")
 TOKENS_FILE = os.path.join(SYSTEM_DIR, "tokens.json")
 USAGE_LOG_FILE = os.path.join(SYSTEM_DIR, "usage_log.jsonl")
@@ -51,9 +51,9 @@ class UserContext:
 
         # ---- 本地基础目录（所有用户都有，用于存放 user_config 等系统文件） ----
         self.base_dir = os.path.join(DATA_DIR, "users", user_id)
-        _karvis_local = os.path.join(self.base_dir, "_Karvis")
-        self.user_config_file = os.path.join(_karvis_local, "user_config.json")
-        self.decision_log_file = os.path.join(_karvis_local, "logs", "decisions.jsonl")
+        _xiaowe_local = os.path.join(self.base_dir, "_XiaoWe")
+        self.user_config_file = os.path.join(_xiaowe_local, "user_config.json")
+        self.decision_log_file = os.path.join(_xiaowe_local, "logs", "decisions.jsonl")
 
         # ---- 加载用户配置 ----
         self.config = self._load_config()
@@ -94,8 +94,8 @@ class UserContext:
         self.fun_notes_dir = os.path.join(_notes, "生活趣事")
         self.voice_journal_dir = os.path.join(_notes, "语音日记")
 
-        # _Karvis 系统文件（memory 走 IO，config/log 始终本地）
-        self.memory_file = os.path.join(self.base_dir, "_Karvis", "memory", "memory.md")
+        # _XiaoWe 系统文件（memory 走 IO，config/log 始终本地）
+        self.memory_file = os.path.join(self.base_dir, "_XiaoWe", "memory", "memory.md")
 
         # 03-WeChat 微信离线数据
         _wechat = os.path.join(self.base_dir, "03-WeChat")
@@ -139,8 +139,8 @@ class UserContext:
         self.fun_notes_dir = f"{base}/02-Notes/生活趣事"
         self.voice_journal_dir = f"{base}/02-Notes/语音日记"
 
-        # _Karvis 系统文件
-        self.memory_file = f"{base}/_Karvis/memory/memory.md"
+        # _XiaoWe 系统文件
+        self.memory_file = f"{base}/_XiaoWe/memory/memory.md"
 
         # 03-WeChat 微信离线数据
         self.wechat_dir = f"{base}/03-WeChat"
@@ -216,7 +216,7 @@ class UserContext:
         inbox = os.path.join(base, "00-Inbox")
         _notes = os.path.join(base, "02-Notes")
         _wechat = os.path.join(base, "03-WeChat")
-        _karvis = os.path.join(base, "_Karvis")
+        _xiaowe = os.path.join(base, "_XiaoWe")
         return [
             inbox,
             os.path.join(inbox, "attachments"),
@@ -230,8 +230,8 @@ class UserContext:
             os.path.join(_wechat, "笔记"),
             os.path.join(_wechat, "收藏"),
             os.path.join(_wechat, "公众号"),
-            os.path.join(_karvis, "memory"),
-            os.path.join(_karvis, "logs"),
+            os.path.join(_xiaowe, "memory"),
+            os.path.join(_xiaowe, "logs"),
         ]
 
 
@@ -348,7 +348,7 @@ def _init_default_files(ctx: UserContext):
         channel = "telegram" if ctx.user_id.startswith("tg_") else "wework"
         config_data = {
             "nickname": "",
-            "ai_name": "Karvis",
+            "ai_name": "XiaoWe",
             "soul_override": "",
             "channel": channel,
             "role": "user",

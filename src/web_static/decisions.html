@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Karvis · 决策追踪</title>
+<title>XiaoWe · 决策追踪</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <script>
@@ -165,8 +165,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
   </nav>
 
 <script>
-const API_HEADERS = () => ({'X-Token': localStorage.getItem('karvis_token')||''});
-function checkAuth() { if(!localStorage.getItem('karvis_token')) location.href='/web/login'; }
+const API_HEADERS = () => ({'X-Token': localStorage.getItem('xiaowe_token')||''});
+function checkAuth() { if(!localStorage.getItem('xiaowe_token')) location.href='/web/login'; }
 
 function decisionsApp() {
   return {
@@ -177,7 +177,7 @@ function decisionsApp() {
       checkAuth();
       try {
         const res = await fetch('/api/decisions', {headers: API_HEADERS()});
-        if (res.status === 401) { localStorage.removeItem('karvis_token'); location.href='/web/login'; return; }
+        if (res.status === 401) { localStorage.removeItem('xiaowe_token'); location.href='/web/login'; return; }
         const d = await res.json();
         this.pending = d.pending || [];
         this.history = d.history || [];

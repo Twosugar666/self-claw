@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-KarvisForAll V12 Skill 热加载器
+XiaoWe V12 Skill 热加载器
 handler 签名: (params, state, ctx) -> dict
 
 V12 改造：支持 visibility 字段和元数据注册。

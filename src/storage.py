@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-KarvisForAll V12 统一存储接口
+XiaoWe V12 统一存储接口
 支持 Local / OneDrive 两种后端，通过工厂方法按用户配置创建。
 
 Duck Typing 协议 — LocalFileIO 和 OneDriveIO 都实现以下方法：

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Karvis · 记忆</title>
+<title>XiaoWe · 记忆</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <script>
@@ -52,7 +52,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
     <div x-show="!sections.length" class="text-center py-12">
       <p class="text-3xl mb-3">🫧</p>
       <p class="text-sm text-warm-500">还没有记忆</p>
-      <p class="text-xs text-warm-400 mt-1">和 Karvis 聊天，告诉它你的偏好和重要的事</p>
+      <p class="text-xs text-warm-400 mt-1">和 XiaoWe 聊天，告诉它你的偏好和重要的事</p>
     </div>
 
     <!-- 底部提示 -->
@@ -72,8 +72,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
   </nav>
 
 <script>
-const API_HEADERS = () => ({'X-Token': localStorage.getItem('karvis_token')||''});
-function checkAuth() { if(!localStorage.getItem('karvis_token')) location.href='/web/login'; }
+const API_HEADERS = () => ({'X-Token': localStorage.getItem('xiaowe_token')||''});
+function checkAuth() { if(!localStorage.getItem('xiaowe_token')) location.href='/web/login'; }
 
 function memoryApp() {
   return {
@@ -82,7 +82,7 @@ function memoryApp() {
       checkAuth();
       try {
         const r = await fetch('/api/memory', {headers: API_HEADERS()});
-        if (r.status === 401) { localStorage.removeItem('karvis_token'); location.href='/web/login'; return; }
+        if (r.status === 401) { localStorage.removeItem('xiaowe_token'); location.href='/web/login'; return; }
         const d = await r.json();
         // 给每个 section 加 _open 状态，默认展开前 3 个
         this.sections = (d.sections || []).map((s, i) => ({...s, _open: i < 3}));

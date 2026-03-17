@@ -1,9 +1,9 @@
 ---
-tags: [karvisforall, issues]
+tags: [xiaowe, issues]
 updated: 2026-02-19
 ---
 
-# KarvisForAll — 已知问题与迭代方向
+# XiaoWe — 已知问题与迭代方向
 
 ## 已修复
 

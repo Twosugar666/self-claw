@@ -4,7 +4,7 @@ Telegram Bot 接入层。
 
 职责：
 1. 接收 Telegram 消息（Webhook）
-2. 解析为 Karvis 统一消息格式
+2. 解析为 XiaoWe 统一消息格式
 3. 转发到 handle_message()
 4. 发送消息到 Telegram
 5. 下载 Telegram 媒体文件
@@ -71,7 +71,7 @@ def send_telegram_message(user_id, text):
 
 def parse_telegram_update(update: dict):
     """
-    解析 Telegram Update 为 Karvis 统一消息格式。
+    解析 Telegram Update 为 XiaoWe 统一消息格式。
 
     返回: (msg_dict, user_id) 或 (None, None)
 

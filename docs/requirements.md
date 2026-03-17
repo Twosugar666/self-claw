@@ -1,4 +1,4 @@
-# KarvisForAll 需求文档
+# XiaoWe 需求文档
 
 > 版本：v1.0
 > 日期：2026-02-15
@@ -10,9 +10,9 @@
 
 ### 1.1 背景
 
-Karvis 是一个运行在企业微信上的 AI 生活助手，通过自然对话帮助用户记录生活、管理待办、复盘情绪、跟踪习惯。当前 Karvis（开源版）是纯单用户架构——一套部署只能服务一个人。
+XiaoWe 是一个运行在企业微信上的 AI 生活助手，通过自然对话帮助用户记录生活、管理待办、复盘情绪、跟踪习惯。当前 XiaoWe（开源版）是纯单用户架构——一套部署只能服务一个人。
 
-KarvisForAll 是 Karvis 的多用户版本，目标是让 2-3 个朋友（后续可扩展到更多人）加入同一个企微团队后，每人拥有独立的 AI 助手体验，数据完全隔离。
+XiaoWe 是 XiaoWe 的多用户版本，目标是让 2-3 个朋友（后续可扩展到更多人）加入同一个企微团队后，每人拥有独立的 AI 助手体验，数据完全隔离。
 
 ### 1.2 项目定位
 
@@ -23,11 +23,11 @@ KarvisForAll 是 Karvis 的多用户版本，目标是让 2-3 个朋友（后续
 | **数据存储** | 服务器本地磁盘（Lite 模式） |
 | **数据查看** | Web 只读页面（用户可查看自己的笔记、待办、日记等） |
 | **成本模型** | 管理员全额承担 LLM 费用 |
-| **技术基线** | 基于 Karvis-opensource 代码改造 |
+| **技术基线** | 基于 XiaoWe-opensource 代码改造 |
 
-### 1.3 与 Karvis-opensource 的关系
+### 1.3 与 XiaoWe-opensource 的关系
 
-KarvisForAll 是一个**独立项目**，从 Karvis-opensource fork 后进行多用户改造。不追求与原版保持同步，而是在原版功能集的基础上做减法和适配。
+XiaoWe 是一个**独立项目**，从 XiaoWe-opensource fork 后进行多用户改造。不追求与原版保持同步，而是在原版功能集的基础上做减法和适配。
 
 ### 1.4 核心原则
 
@@ -45,7 +45,7 @@ KarvisForAll 是一个**独立项目**，从 Karvis-opensource fork 后进行多
 | 角色 | 描述 | 权限 |
 |---|---|---|
 | **管理员** | 部署者，企微团队创建者，承担 LLM 费用 | 查看所有用户列表、使用量统计、管理用户状态 |
-| **普通用户** | 被管理员邀请加入企微团队的朋友 | 使用 Karvis 全部对话功能、查看自己的 Web 页面 |
+| **普通用户** | 被管理员邀请加入企微团队的朋友 | 使用 XiaoWe 全部对话功能、查看自己的 Web 页面 |
 
 ### 2.2 管理员特有操作
 
@@ -56,7 +56,7 @@ KarvisForAll 是一个**独立项目**，从 Karvis-opensource fork 后进行多
 
 ### 2.3 普通用户操作
 
-- 在企微中直接给 Karvis 发消息（文字/语音/图片/视频/链接）
+- 在企微中直接给 XiaoWe 发消息（文字/语音/图片/视频/链接）
 - 通过对话设置个人偏好（昵称、AI 人格风格等）
 - 通过 Web 页面查看自己的数据（只读）
 
@@ -68,7 +68,7 @@ KarvisForAll 是一个**独立项目**，从 Karvis-opensource fork 后进行多
 
 #### F1：自动注册与欢迎引导
 
-**触发条件**：一个新的企微用户 ID 首次向 Karvis 发送消息。
+**触发条件**：一个新的企微用户 ID 首次向 XiaoWe 发送消息。
 
 **处理流程**：
 
@@ -88,12 +88,12 @@ KarvisForAll 是一个**独立项目**，从 Karvis-opensource fork 后进行多
    │   ├── 工作笔记/
    │   ├── 生活趣事/
    │   └── 语音日记/
-   └── _Karvis/
+   └── _XiaoWe/
        ├── memory/memory.md
        ├── user_config.json
        └── logs/decisions.jsonl
    ```
-3. 写入用户注册表（`_karvis_system/users.json`）
+3. 写入用户注册表（`_xiaowe_system/users.json`）
 4. 发送欢迎消息，引导用户设置昵称
 5. 继续正常处理该条消息
 
@@ -104,7 +104,7 @@ KarvisForAll 是一个**独立项目**，从 Karvis-opensource fork 后进行多
 
 #### F2：用户注册表
 
-**数据结构**（`_karvis_system/users.json`）：
+**数据结构**（`_xiaowe_system/users.json`）：
 
 ```json
 {
@@ -143,7 +143,7 @@ KarvisForAll 是一个**独立项目**，从 Karvis-opensource fork 后进行多
 - 提取昵称，写入 `user_config.json` 的 `nickname` 字段
 - 同时写入用户注册表的 `nickname` 字段
 - 同时写入用户的 `memory.md`（如"用户希望被称为「小明」"）
-- 后续所有对话中，Karvis 使用该昵称称呼用户
+- 后续所有对话中，XiaoWe 使用该昵称称呼用户
 
 **验收标准**：
 - 设置后立即生效，下一条消息回复中即使用新昵称
@@ -177,9 +177,9 @@ KarvisForAll 是一个**独立项目**，从 Karvis-opensource fork 后进行多
 
 ---
 
-### 3.3 核心对话功能（继承自 Karvis-opensource）
+### 3.3 核心对话功能（继承自 XiaoWe-opensource）
 
-以下功能从 Karvis-opensource 完整继承，每个功能在多用户环境下的关键要求是**数据隔离**——所有文件读写都必须指向当前用户的目录。
+以下功能从 XiaoWe-opensource 完整继承，每个功能在多用户环境下的关键要求是**数据隔离**——所有文件读写都必须指向当前用户的目录。
 
 #### F6：速记 / 笔记保存
 
@@ -189,7 +189,7 @@ KarvisForAll 是一个**独立项目**，从 Karvis-opensource fork 后进行多
 
 #### F7：智能归档
 
-- Karvis 自动将有价值的内容归档到对应分类（工作/情感/生活/通用）
+- XiaoWe 自动将有价值的内容归档到对应分类（工作/情感/生活/通用）
 - 支持归档合并（多段内容合并为一篇笔记）
 - **隔离要求**：归档写入该用户的 `02-Notes/` 子目录
 
@@ -239,7 +239,7 @@ KarvisForAll 是一个**独立项目**，从 Karvis-opensource fork 后进行多
 
 #### F16：主题深潜
 
-- 用户提出某个话题，Karvis 跨时间线搜索该用户的历史笔记，生成分析报告
+- 用户提出某个话题，XiaoWe 跨时间线搜索该用户的历史笔记，生成分析报告
 - 通过 Agent Loop（最多 5 轮 internal.read / internal.search / internal.list）完成
 - **隔离要求**：只搜索和读取当前用户的数据
 
@@ -306,17 +306,17 @@ KarvisForAll 是一个**独立项目**，从 Karvis-opensource fork 后进行多
 
 **方案：Token 令牌制**（简单可靠，适合 2-3 人场景）
 
-- 用户在企微中对 Karvis 说"给我查看链接"或"我要看我的数据"
-- Karvis 生成一个一次性/短期令牌（如 24 小时有效），回复一个带 token 的 URL
+- 用户在企微中对 XiaoWe 说"给我查看链接"或"我要看我的数据"
+- XiaoWe 生成一个一次性/短期令牌（如 24 小时有效），回复一个带 token 的 URL
 - 用户点击链接直接进入自己的数据页面，无需输入密码
-- 令牌过期后需重新向 Karvis 索取
+- 令牌过期后需重新向 XiaoWe 索取
 
 **令牌管理**：
 | 属性 | 值 |
 |---|---|
 | 格式 | UUID v4 |
 | 有效期 | 24 小时（可配置） |
-| 存储 | 内存 + 持久化到 `_karvis_system/tokens.json` |
+| 存储 | 内存 + 持久化到 `_xiaowe_system/tokens.json` |
 | 关联 | 令牌 → user_id 的映射 |
 
 **验收标准**：
@@ -351,7 +351,7 @@ KarvisForAll 是一个**独立项目**，从 Karvis-opensource fork 后进行多
 #### F22：LLM 用量追踪
 
 - 每次 LLM 调用记录：`user_id`、`model`、`input_tokens`、`output_tokens`、`timestamp`
-- 写入 `_karvis_system/usage_log.jsonl`（追加写入）
+- 写入 `_xiaowe_system/usage_log.jsonl`（追加写入）
 - 管理员仪表盘读取此文件生成统计
 
 #### F23：不活跃用户跳过
@@ -416,7 +416,7 @@ KarvisForAll 是一个**独立项目**，从 Karvis-opensource fork 后进行多
 
 ```
 {DATA_DIR}/
-├── _karvis_system/                     ← 系统级数据
+├── _xiaowe_system/                     ← 系统级数据
 │   ├── users.json                      ← 用户注册表
 │   ├── tokens.json                     ← Web 访问令牌
 │   └── usage_log.jsonl                 ← LLM 用量日志
@@ -436,7 +436,7 @@ KarvisForAll 是一个**独立项目**，从 Karvis-opensource fork 后进行多
     │   │   ├── 工作笔记/
     │   │   ├── 生活趣事/
     │   │   └── 语音日记/
-    │   └── _Karvis/
+    │   └── _XiaoWe/
     │       ├── memory/memory.md        ← 长期记忆
     │       ├── user_config.json        ← 用户配置（昵称、风格覆写等）
     │       └── logs/decisions.jsonl    ← 决策日志
@@ -496,7 +496,7 @@ class UserContext:
 
 #### State（运行时状态）
 
-与 Karvis-opensource 的 `.ai-life-state.json` 结构完全一致，每个用户独立一份，包含：
+与 XiaoWe-opensource 的 `.ai-life-state.json` 结构完全一致，每个用户独立一份，包含：
 - `recent_messages`：短期记忆滑动窗口
 - `checkin_pending` / `checkin_step` / `checkin_answers`：打卡进度
 - `active_book` / `active_media`：当前在读/在看
@@ -533,7 +533,7 @@ class UserContext:
 
 ### 6.3 存储方案
 
-KarvisForAll **只使用 Lite 本地模式**，不支持 OneDrive。
+XiaoWe **只使用 Lite 本地模式**，不支持 OneDrive。
 
 原因：
 - 多用户数据存一个人的 OneDrive 有隐私问题
@@ -549,7 +549,7 @@ KarvisForAll **只使用 Lite 本地模式**，不支持 OneDrive。
 
 原版缓存是全局单例，多用户需按 user_id 分区：
 
-| 缓存项 | 原版 | KarvisForAll |
+| 缓存项 | 原版 | XiaoWe |
 |---|---|---|
 | State 缓存 | `_state_cache = {"data": ..., "expire_time": ...}` | `_state_cache = {user_id: {"data": ..., "expire_time": ...}}` |
 | Prompt 缓存 | `PromptCache` 全局单例 | 保持全局（Prompt 模板所有用户共享） |
@@ -587,14 +587,14 @@ Web 服务与消息处理服务共享同一个 Flask 进程，通过路由前缀
 - 移动端优先的响应式设计
 - 底部 Tab 导航栏（概览 / 速记 / 待办 / 日记 / 笔记）
 - 顶部显示用户昵称和当前日期
-- 颜色风格：温暖柔和（与 Karvis 的"温柔大姐姐"人设呼应）
+- 颜色风格：温暖柔和（与 XiaoWe 的"温柔大姐姐"人设呼应）
 
 #### P1：登录页 (`/web/login`)
 
 - 简洁居中布局
 - 一个输入框（粘贴 token 或直接从 URL 参数自动填入）
 - 登录按钮
-- 底部提示："在企微中对 Karvis 说「给我查看链接」获取访问令牌"
+- 底部提示："在企微中对 XiaoWe 说「给我查看链接」获取访问令牌"
 
 #### P2：概览页 / 仪表盘 (`/web/dashboard`)
 
@@ -677,7 +677,7 @@ Web 服务与消息处理服务共享同一个 Flask 进程，通过路由前缀
 
 | 任务 | 说明 |
 |---|---|
-| 1.1 初始化项目结构 | 从 Karvis-opensource fork，调整目录结构 |
+| 1.1 初始化项目结构 | 从 XiaoWe-opensource fork，调整目录结构 |
 | 1.2 实现 `UserContext` | 核心上下文类、用户注册表、自动初始化 |
 | 1.3 改造 `config.py` | 保留全局配置，路径相关改为 UserContext |
 | 1.4 改造 `memory.py` | 缓存按 user_id 分区，函数加 ctx 参数 |
@@ -689,7 +689,7 @@ Web 服务与消息处理服务共享同一个 Flask 进程，通过路由前缀
 
 ### Phase 2：对话式设置 + 引导
 
-**目标**：用户可通过对话自定义 Karvis 行为。
+**目标**：用户可通过对话自定义 XiaoWe 行为。
 
 | 任务 | 说明 |
 |---|---|
@@ -791,9 +791,9 @@ Web 服务与消息处理服务共享同一个 Flask 进程，通过路由前缀
 
 ---
 
-## 附录 A：从 Karvis-opensource 继承的功能映射
+## 附录 A：从 XiaoWe-opensource 继承的功能映射
 
-| Karvis-opensource Skill | KarvisForAll 对应 | 改造内容 |
+| XiaoWe-opensource Skill | XiaoWe 对应 | 改造内容 |
 |---|---|---|
 | `note.save` | 继承 | 路径 → ctx |
 | `classify.archive` | 继承 | 路径 → ctx |

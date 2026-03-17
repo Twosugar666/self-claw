@@ -10,7 +10,7 @@
 
 格式固定是：`你的地址/wework`
 
-企微在保存配置时会向这个地址发一个验证请求，**必须能访问才能保存成功**。所以 Karvis 必须先启动，然后再去填这个 URL。
+企微在保存配置时会向这个地址发一个验证请求，**必须能访问才能保存成功**。所以 XiaoWe 必须先启动，然后再去填这个 URL。
 
 ---
 
@@ -18,7 +18,7 @@
 
 | 我的情况 | 对应方案 |
 |----------|----------|
-| 用自己的电脑/Mac 跑 Karvis | [方案 A：本地电脑（用 cloudflared）](#方案-a本地电脑用-cloudflared) |
+| 用自己的电脑/Mac 跑 XiaoWe | [方案 A：本地电脑（用 cloudflared）](#方案-a本地电脑用-cloudflared) |
 | 在云服务器（腾讯云/阿里云等）上跑 | [方案 B：云服务器（直接用公网 IP）](#方案-b云服务器直接用公网-ip) |
 
 ---
@@ -27,17 +27,17 @@
 
 本地电脑没有公网 IP，企微无法直接访问。需要用 cloudflared 把本地服务"穿透"到公网。
 
-### 第一步：启动 Karvis
+### 第一步：启动 XiaoWe
 
 ```bash
-cd KarvisForAll
+cd XiaoWe
 ./setup.sh
 ```
 
 或者手动启动：
 
 ```bash
-cd KarvisForAll/src
+cd XiaoWe/src
 python3 app.py
 ```
 
@@ -78,7 +78,7 @@ cloudflared tunnel --url http://localhost:9000
 2. 找到 **接收消息** → **设置 API 接收**
 3. 填写：
    - **URL**：`https://abc-def-ghi.trycloudflare.com/wework`（换成你实际的地址，末尾加 `/wework`）
-   - **Token** 和 **EncodingAESKey**：点击页面上的**随机获取**按钮各生成一个，然后把生成的值分别复制到 `.env` 的 `WEWORK_TOKEN` 和 `WEWORK_ENCODING_AES_KEY` 字段，保存 `.env` 后重启 Karvis
+   - **Token** 和 **EncodingAESKey**：点击页面上的**随机获取**按钮各生成一个，然后把生成的值分别复制到 `.env` 的 `WEWORK_TOKEN` 和 `WEWORK_ENCODING_AES_KEY` 字段，保存 `.env` 后重启 XiaoWe
 4. 点击**保存**
 
 保存成功 = 配置完成。
@@ -126,22 +126,22 @@ curl -4 ifconfig.me
 验证端口是否开放（在服务器上执行）：
 
 ```bash
-# 确认 Karvis 在监听 9000 端口
+# 确认 XiaoWe 在监听 9000 端口
 ss -tlnp | grep 9000
 # 应该看到类似：LISTEN  0  128  0.0.0.0:9000  ...
 ```
 
-### 第三步：启动 Karvis
+### 第三步：启动 XiaoWe
 
 ```bash
-cd KarvisForAll/src
+cd XiaoWe/src
 python3 app.py
 ```
 
 或后台运行：
 
 ```bash
-nohup python3 app.py > karvis.log 2>&1 &
+nohup python3 app.py > xiaowe.log 2>&1 &
 ```
 
 ### 第四步：去企微填写 URL
@@ -150,7 +150,7 @@ nohup python3 app.py > karvis.log 2>&1 &
 2. 找到 **接收消息** → **设置 API 接收**
 3. 填写：
    - **URL**：`http://43.138.xx.xx:9000/wework`（换成你的真实公网 IP）
-   - **Token** 和 **EncodingAESKey**：点击页面上的**随机获取**按钮各生成一个，然后把生成的值分别复制到 `.env` 的 `WEWORK_TOKEN` 和 `WEWORK_ENCODING_AES_KEY` 字段，保存 `.env` 后重启 Karvis
+   - **Token** 和 **EncodingAESKey**：点击页面上的**随机获取**按钮各生成一个，然后把生成的值分别复制到 `.env` 的 `WEWORK_TOKEN` 和 `WEWORK_ENCODING_AES_KEY` 字段，保存 `.env` 后重启 XiaoWe
 4. 点击**保存**
 
 > 如果你之前已经在企微生成过 Token/AESKey 并填入了 `.env`，直接把 `.env` 里的值原样填回来就行，保持两边一致即可。
@@ -171,7 +171,7 @@ nohup python3 app.py > karvis.log 2>&1 &
 
 企微访问不到你的服务，排查顺序：
 
-1. **Karvis 是否启动了？**
+1. **XiaoWe 是否启动了？**
    ```bash
    # 本地
    curl http://localhost:9000/wework
@@ -216,15 +216,15 @@ Token 或 AESKey 填错了。检查：
 
 ```bash
 # Docker
-docker logs karvis --tail 50
+docker logs xiaowe --tail 50
 
 # 手动运行
-tail -50 karvis.log
+tail -50 xiaowe.log
 ```
 
 搜索 `[handle_message]`：
 - **有**：消息收到了，继续往下查
-- **没有**：消息根本没送到 Karvis，检查回调 URL 是否还有效（本地 cloudflared 地址可能变了）
+- **没有**：消息根本没送到 XiaoWe，检查回调 URL 是否还有效（本地 cloudflared 地址可能变了）
 
 **2. 搜索 `[Brain]`**
 
@@ -239,7 +239,7 @@ tail -50 karvis.log
 
 ```bash
 # 看日志有没有 API 报错
-grep -i "error\|fail\|余额" karvis.log | tail -20
+grep -i "error\|fail\|余额" xiaowe.log | tail -20
 ```
 
 API Key 无效或余额不足也会导致没有回复。
@@ -250,7 +250,7 @@ API Key 无效或余额不足也会导致没有回复。
 
 部署完对照检查一遍：
 
-- [ ] Karvis 服务正在运行（能访问 `http://localhost:9000`）
+- [ ] XiaoWe 服务正在运行（能访问 `http://localhost:9000`）
 - [ ] 公网 URL 可以从外部访问（浏览器能打开）
 - [ ] 企微后台 URL 末尾有 `/wework`
 - [ ] Token 和 AESKey 和 `.env` 一致

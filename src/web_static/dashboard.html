@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Karvis · 概览</title>
+<title>XiaoWe · 概览</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
@@ -173,10 +173,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
     <!-- 空状态引导 -->
     <div x-show="!data.note_count_today && !data.todo_total && !(data.mood_chart && data.mood_chart.length)" class="bg-white rounded-xl p-6 shadow-sm text-center">
       <p class="text-3xl mb-3">👋</p>
-      <p class="text-sm font-medium text-warm-800 mb-2">欢迎使用 Karvis</p>
-      <p class="text-xs text-warm-500 mb-4 leading-relaxed">在企微和 Karvis 聊天，你的生活碎片会自动记录在这里</p>
+      <p class="text-sm font-medium text-warm-800 mb-2">欢迎使用 XiaoWe</p>
+      <p class="text-xs text-warm-500 mb-4 leading-relaxed">在企微和 XiaoWe 聊天，你的生活碎片会自动记录在这里</p>
       <div class="space-y-2 text-xs text-warm-600">
-        <p>💡 试试和 Karvis 说：</p>
+        <p>💡 试试和 XiaoWe 说：</p>
         <p class="bg-warm-50 rounded-lg px-3 py-2">"今天面试很顺利"</p>
         <p class="bg-warm-50 rounded-lg px-3 py-2">"提醒我明天买猫粮"</p>
         <p class="bg-warm-50 rounded-lg px-3 py-2">"帮我回顾最近的情绪"</p>
@@ -210,8 +210,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
   </nav>
 
 <script>
-const API_HEADERS = () => ({'X-Token': localStorage.getItem('karvis_token')||''});
-function checkAuth() { if(!localStorage.getItem('karvis_token')) location.href='/web/login'; }
+const API_HEADERS = () => ({'X-Token': localStorage.getItem('xiaowe_token')||''});
+function checkAuth() { if(!localStorage.getItem('xiaowe_token')) location.href='/web/login'; }
 
 function dashApp() {
   return {
@@ -222,7 +222,7 @@ function dashApp() {
     },
     async load() {
       checkAuth();
-      const nn = localStorage.getItem('karvis_nickname') || '';
+      const nn = localStorage.getItem('xiaowe_nickname') || '';
       this.greeting = `Hi, ${nn || '你好'}！`;
       const now = new Date();
       const wd = ['周日','周一','周二','周三','周四','周五','周六'][now.getDay()];
@@ -232,7 +232,7 @@ function dashApp() {
           fetch('/api/dashboard', {headers: API_HEADERS()}),
           fetch('/api/announcements', {headers: API_HEADERS()}).catch(() => null),
         ]);
-        if (dashRes.status === 401) { localStorage.removeItem('karvis_token'); location.href='/web/login'; return; }
+        if (dashRes.status === 401) { localStorage.removeItem('xiaowe_token'); location.href='/web/login'; return; }
         this.data = await dashRes.json();
         if (annRes && annRes.ok) {
           const annData = await annRes.json();

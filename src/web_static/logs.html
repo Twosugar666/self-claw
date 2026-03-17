@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Karvis · 日志 & 监控</title>
+<title>XiaoWe · 日志 & 监控</title>
 <script src="https://cdn.tailwindcss.com/3.4.1"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.3/dist/cdn.min.js"></script>
 <script src="/web/static/chart.umd.min.js"></script>
@@ -60,7 +60,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
       <h1 class="text-xl font-bold text-warm-900">📋 日志 & 监控</h1>
       <div class="flex items-center gap-3">
         <a href="/web/admin" class="text-sm text-warm-500 hover:text-warm-700">← 管理面板</a>
-        <button @click="authed=false;adminToken='';localStorage.removeItem('karvis_admin_token')" class="text-sm text-warm-500">退出</button>
+        <button @click="authed=false;adminToken='';localStorage.removeItem('xiaowe_admin_token')" class="text-sm text-warm-500">退出</button>
       </div>
     </div>
 
@@ -407,14 +407,14 @@ function logsApp() {
       try {
         const r = await fetch('/api/admin/users', { headers: {'X-Admin-Token': this.adminToken} });
         if (r.status === 403) { this.authError = '密钥错误'; return; }
-        localStorage.setItem('karvis_admin_token', this.adminToken);
+        localStorage.setItem('xiaowe_admin_token', this.adminToken);
         this.authed = true;
         this.fetchLogs();
       } catch(e) { this.authError = '网络错误'; }
     },
 
     async init() {
-      const saved = localStorage.getItem('karvis_admin_token');
+      const saved = localStorage.getItem('xiaowe_admin_token');
       if (saved) { this.adminToken = saved; await this.login(); }
       this.$watch('autoRefresh', (val) => {
         if (this._timer) { clearInterval(this._timer); this._timer = null; }

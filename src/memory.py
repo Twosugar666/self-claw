@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-KarvisForAll 记忆管理（多用户版）
+XiaoWe 记忆管理（多用户版）
 缓存按 user_id 分区，所有函数接收 UserContext。
 """
 import time
@@ -17,7 +17,7 @@ def _log(msg):
 
 # ============ Prompt 缓存（按 file_path，多用户天然隔离）============
 
-_TMP_CACHE_DIR = "/tmp/karvis_prompts"
+_TMP_CACHE_DIR = "/tmp/xiaowe_prompts"
 
 class PromptCache:
     """Memory 文件缓存：内存 → /tmp 磁盘 → 本地文件（三级缓存）"""
@@ -111,7 +111,7 @@ def format_recent_messages(state):
         if role_val == "system":
             lines.append(m.get("content", ""))
             continue
-        role = "用户" if role_val == "user" else "Karvis"
+        role = "用户" if role_val == "user" else "XiaoWe"
         t = m.get("time", "")
         content = m.get("content", "")
         if len(content) > 150:
@@ -152,7 +152,7 @@ def maybe_compress_messages(messages):
         if m.get("role") == "system" and m.get("content", "").startswith("[对话摘要]"):
             summary_parts.append(m["content"])
             continue
-        role = "用户" if m.get("role") == "user" else "Karvis"
+        role = "用户" if m.get("role") == "user" else "XiaoWe"
         content = m.get("content", "")
         # 截取关键部分（保留足够语义）
         if len(content) > 100:

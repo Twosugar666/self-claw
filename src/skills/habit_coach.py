@@ -16,7 +16,7 @@ state.active_experiment 结构：
     "end_date": "2026-02-23",
     "hypothesis": "当晚上想刷手机时，改为做15分钟创造性活动，第二天情绪评分会更高",
     "triggers": ["好无聊", "刷手机", "刷抖音"],
-    "micro_action": "15分钟vibecoding或和Karvis聊天",
+    "micro_action": "15分钟vibecoding或和XiaoWe聊天",
     "tracking": {
         "trigger_count": 0,
         "accepted_count": 0,

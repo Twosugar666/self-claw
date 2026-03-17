@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Karvis · 速记</title>
+<title>XiaoWe · 速记</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -145,7 +145,7 @@ body {
 
 <script>
 (function(){
-  var token = localStorage.getItem('karvis_token');
+  var token = localStorage.getItem('xiaowe_token');
   if (!token) { location.href = '/web/login'; return; }
 
   var $loading  = document.getElementById('loading');
@@ -219,7 +219,7 @@ body {
       $loading.style.display = 'none';
 
       if (xhr.status === 401) {
-        localStorage.removeItem('karvis_token');
+        localStorage.removeItem('xiaowe_token');
         location.href = '/web/login';
         return;
       }

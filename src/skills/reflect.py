@@ -29,7 +29,7 @@ def _log(msg):
 
 def _reflect_dir(ctx):
     """获取用户的 reflect 数据目录（始终本地存储，不走 OneDrive）"""
-    d = os.path.join(ctx.base_dir, "_Karvis", "reflect")
+    d = os.path.join(ctx.base_dir, "_XiaoWe", "reflect")
     os.makedirs(d, exist_ok=True)
     return d
 

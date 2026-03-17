@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-KarvisForAll 统一配置
+XiaoWe 统一配置
 凭证和运行参数集中管理。
 路径相关已迁移到 user_context.py（按用户隔离）。
 """
@@ -73,7 +73,7 @@ SCHEDULER_PUSH_MAX_DAILY = 6      # 每日所有主动推送总上限
 SCHEDULER_MIN_PUSH_GAP = 30       # 两次推送最小间隔（分钟）
 
 # ============ 日志查看 ============
-LOG_FILE_KARVISFORALL = os.environ.get("LOG_FILE_KARVISFORALL", "/root/KarvisForAll/logs/app.log")
+LOG_FILE_XIAOWE = os.environ.get("LOG_FILE_XIAOWE", "/root/XiaoWe/logs/app.log")
 
 # ============ 服务端口 ============
 SERVER_PORT = int(os.environ.get("SERVER_PORT", "9000"))

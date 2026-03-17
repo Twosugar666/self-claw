@@ -47,13 +47,13 @@ _STATE_WHITELIST = {
 # file 操作允许的目录前缀（相对用户数据根目录）
 _FILE_WRITE_PREFIXES = (
     "02-Notes/",
-    "_Karvis/",
+    "_XiaoWe/",
 )
 
 _FILE_READ_PREFIXES = (
     "02-Notes/",
     "01-DailyNotes/",
-    "_Karvis/",
+    "_XiaoWe/",
 )
 
 _MAX_ACTIONS = 10
